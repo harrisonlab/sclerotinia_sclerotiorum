@@ -1,14 +1,10 @@
 # sclerotinia_sclerotiorum
 Commands used fr the analysis of Sclerotinia spp. genomes
 
-
-# neonectria_ditissima (Assembly_v2)
-Scripts used during analysis of neonectria_ditissima genomes.
-
-neonectria_ditissima
+Sclerotinia sclerotiorum 
 ====================
 
-Commands used during analysis of the neonectria_ditissima genome. Note - all this work was performed in the directory: /home/groups/harrisonlab/project_files/neonectria_ditissima
+Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory: /home/groups/harrisonlab/project_files/neonectria_ditissima
 
 The following is a summary of the work presented in this Readme:
 Data organisation:
