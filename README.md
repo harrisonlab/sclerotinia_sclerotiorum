@@ -4,7 +4,12 @@ Commands used fr the analysis of Sclerotinia spp. genomes
 Sclerotinia sclerotiorum
 ====================
 
-Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory: /home/groups/harrisonlab/project_files/neonectria_ditissima
+
+Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory:
+```bash
+mkdir -p /home/groups/harrisonlab/project_files/Sclerotinia_spp
+cd /home/groups/harrisonlab/project_files/Sclerotinia_spp
+```
 
 The following is a summary of the work presented in this Readme:
 Data organisation:
