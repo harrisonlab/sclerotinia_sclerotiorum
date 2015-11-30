@@ -28,7 +28,34 @@ Genome analysis
 Data was copied from the raw_data repository to a local directory for assembly
 and annotation.
 
+
 ```bash
+  RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/Sclerotinia
+  # DG4
+  mkdir -p raw_data/paired/S.sclerotiorum/DG4/F
+  mkdir -p raw_data/paired/S.sclerotiorum/DG4/R
+  cp $RawDatDir/Run\ 1/DG4_S1_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/DG4/F/.
+  cp $RawDatDir/Run\ 1/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/.
+  # P7
+  mkdir -p raw_data/paired/S.sclerotiorum/P7/F
+  mkdir -p raw_data/paired/S.sclerotiorum/P7/R
+  cp $RawDatDir/Run\ 1/P7_S2_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/F/.
+  cp $RawDatDir/Run\ 1/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/.
+  # HE1
+  mkdir -p raw_data/paired/S.subartica/HE1/F
+  mkdir -p raw_data/paired/S.subartica/HE1/R
+  cp $RawDatDir/Run\ 1/HE1_S4_L001_R1_001.fastq.gz raw_data/paired/S.subartica/HE1/F/.
+  cp $RawDatDir/Run\ 1/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/.
+  # R316
+  mkdir -p raw_data/paired/S.trifoliorum/R316/F
+  mkdir -p raw_data/paired/S.trifoliorum/R316/R
+  cp $RawDatDir/Run\ 1/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
+  cp $RawDatDir/Run\ 1/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
+  # S5
+  mkdir -p raw_data/paired/S.minor/S5/F
+  mkdir -p raw_data/paired/S.minor/S5/R
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/.
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/.
 
 ```
 
