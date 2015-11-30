@@ -41,8 +41,7 @@ and annotation.
   cp $RawDatDir/Run\ 2/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/DG4_S1_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/DG4/F/DG4_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run3_R_fq.gz
-  cp $RawDatDir/Run\ 4/DG4_S1_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/DG4/F/DG4_run4_F_fq.gz
-  cp $RawDatDir/Run\ 4/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run4_R_fq.gz
+
   # P7
   mkdir -p raw_data/paired/S.sclerotiorum/P7/F
   mkdir -p raw_data/paired/S.sclerotiorum/P7/R
@@ -52,8 +51,7 @@ and annotation.
   cp $RawDatDir/Run\ 2/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/P7_S2_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/F/P7_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run3_R_fq.gz
-  cp $RawDatDir/Run\ 4/P7_S2_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/F/P7_run4_F_fq.gz
-  cp $RawDatDir/Run\ 4/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run4_R_fq.gz
+
   # HE1
   mkdir -p raw_data/paired/S.subartica/HE1/F
   mkdir -p raw_data/paired/S.subartica/HE1/R
@@ -63,26 +61,27 @@ and annotation.
   cp $RawDatDir/Run\ 2/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/HE1_S4_L001_R1_001.fastq.gz raw_data/paired/S.subartica/HE1/F/HE1_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run3_R_fq.gz
-  cp $RawDatDir/Run\ 4/HE1_S4_L001_R1_001.fastq.gz raw_data/paired/S.subartica/HE1/F/HE1_run4_F_fq.gz
-  cp $RawDatDir/Run\ 4/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run4_R_fq.gz
+
   # R316
   mkdir -p raw_data/paired/S.trifoliorum/R316/F
   mkdir -p raw_data/paired/S.trifoliorum/R316/R
   cp $RawDatDir/Run\ 1/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run1_F_fq.gz
-  cp $RawDatDir/Run\ 1/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
-  cp $RawDatDir/Run\ 2/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
-  cp $RawDatDir/Run\ 2/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
-  cp $RawDatDir/Run\ 3/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
-  cp $RawDatDir/Run\ 3/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
-  cp $RawDatDir/Run\ 4/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
-  cp $RawDatDir/Run\ 4/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
+  cp $RawDatDir/Run\ 1/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run1_R_fq.gz
+  cp $RawDatDir/Run\ 2/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run2_F_fq.gz
+  cp $RawDatDir/Run\ 2/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run2_R_fq.gz
+  cp $RawDatDir/Run\ 3/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run3_F_fq.gz
+  cp $RawDatDir/Run\ 3/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run3_R_fq.gz
+
 
   # S5
   mkdir -p raw_data/paired/S.minor/S5/F
   mkdir -p raw_data/paired/S.minor/S5/R
-  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/.
-  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/.
-
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run1_F_fq.gz
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run1_R_fq.gz
+  cp $RawDatDir/Run\ 2/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run2_F_fq.gz
+  cp $RawDatDir/Run\ 2/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run2_R_fq.gz
+  cp $RawDatDir/Run\ 3/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run3_F_fq.gz
+  cp $RawDatDir/Run\ 3/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run3_R_fq.gz
 ```
 
 
