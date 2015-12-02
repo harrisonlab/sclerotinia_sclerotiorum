@@ -13,7 +13,7 @@ cd /home/groups/harrisonlab/project_files/Sclerotinia_spp
 
 The following is a summary of the work presented in this Readme:
 Data organisation:
-  * Preparing data  
+  * Preparing data
 Draft Genome assembly
   * Data qc
   * Genome assembly
@@ -93,15 +93,39 @@ programs: fastqc fastq-mcf kmc
 Data quality was visualised using fastqc:
 
 ```bash
-
+for RawData in $(ls raw_data/paired/S.*/*/*/*_fq.gz); do
+echo $RawData;
+ProgDir=~/git_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RawData;
+done
 ```
 
+
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
-This was done with fastq-mcf
+This was done with fastq-mcf.
 
 
 ```bash
-
+for Strain in $(ls raw_data/paired/S.*/); do
+echo $Strain
+IluminaAdapters=/home/ransoe/git_repos/tools/seq_tools/ncbi_adapters.fa
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/rna_qc
+Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run1')
+Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run1')
+echo $Read_F
+echo $Read_R
+qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
+Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run2')
+Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run2')
+echo $Read_F
+echo $Read_R
+qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
+Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run3')
+Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run3')
+echo $Read_F
+echo $Read_R
+qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
+done
 ```
 
 Data quality was visualised once again following trimming:
