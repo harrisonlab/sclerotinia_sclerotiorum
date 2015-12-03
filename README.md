@@ -106,22 +106,24 @@ This was done with fastq-mcf.
 
 
 ```bash
-for Strain in $(ls raw_data/paired/S.*/); do
-echo $Strain
+for StrainPath in $(ls -d raw_data/paired/S.*/*); do
+echo $StrainPath
 IluminaAdapters=/home/ransoe/git_repos/tools/seq_tools/ncbi_adapters.fa
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/rna_qc
-Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run1')
-Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run1')
+Read_F=$(ls $StrainPath/F/*_fq.gz | grep 'run1')
+Read_R=$(ls $StrainPath/R/*_fq.gz | grep 'run1')
 echo $Read_F
 echo $Read_R
 qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
-Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run2')
-Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run2')
+
+Read_F=$(ls $StrainPath/F/*_fq.gz | grep 'run2')
+Read_R=$(ls $StrainPath/R/*_fq.gz | grep 'run2')
 echo $Read_F
 echo $Read_R
 qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
-Read_F=$(ls raw_data/paired/S.*/$Strain/F/*_fq.gz) | grep 'run3')
-Read_R=$(ls raw_data/paired/S.*/$Strain/R/*_fq.gz | grep 'run3')
+
+Read_F=$(ls $StrainPath/F/*_fq.gz | grep 'run3')
+Read_R=$(ls $StrainPath/R/*_fq.gz | grep 'run3')
 echo $Read_F
 echo $Read_R
 qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
