@@ -133,7 +133,11 @@ done
 Data quality was visualised once again following trimming:
 
 ```bash
-
+for TrimData in $(ls qc_dna/paired/S.*/*/*/*.fq.gz); do
+echo $TrimData;
+ProgDir=~/git_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $TrimData;
+done
 ```
 
 
