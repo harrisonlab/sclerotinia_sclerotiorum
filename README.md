@@ -41,7 +41,8 @@ and annotation.
   cp $RawDatDir/Run\ 2/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/DG4_S1_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/DG4/F/DG4_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run3_R_fq.gz
-
+  cp $RawDatDir/Run\ 4/DG4_S1_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/DG4/F/DG4_run4_F_fq.gz
+  cp $RawDatDir/Run\ 4/DG4_S1_L001_R2_001.fastq.gz  raw_data/paired/S.sclerotiorum/DG4/R/DG4_run4_R_fq.gz
   # P7
   mkdir -p raw_data/paired/S.sclerotiorum/P7/F
   mkdir -p raw_data/paired/S.sclerotiorum/P7/R
@@ -51,7 +52,8 @@ and annotation.
   cp $RawDatDir/Run\ 2/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/P7_S2_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/F/P7_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run3_R_fq.gz
-
+  cp $RawDatDir/Run\ 4/P7_S2_L001_R1_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/F/P7_run4_F_fq.gz
+  cp $RawDatDir/Run\ 4/P7_S2_L001_R2_001.fastq.gz raw_data/paired/S.sclerotiorum/P7/R/P7_run4_R_fq.gz
   # HE1
   mkdir -p raw_data/paired/S.subartica/HE1/F
   mkdir -p raw_data/paired/S.subartica/HE1/R
@@ -61,27 +63,26 @@ and annotation.
   cp $RawDatDir/Run\ 2/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run2_R_fq.gz
   cp $RawDatDir/Run\ 3/HE1_S4_L001_R1_001.fastq.gz raw_data/paired/S.subartica/HE1/F/HE1_run3_F_fq.gz
   cp $RawDatDir/Run\ 3/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run3_R_fq.gz
-
+  cp $RawDatDir/Run\ 4/HE1_S4_L001_R1_001.fastq.gz raw_data/paired/S.subartica/HE1/F/HE1_run4_F_fq.gz
+  cp $RawDatDir/Run\ 4/HE1_S4_L001_R2_001.fastq.gz  raw_data/paired/S.subartica/HE1/R/HE1_run4_R_fq.gz
   # R316
   mkdir -p raw_data/paired/S.trifoliorum/R316/F
   mkdir -p raw_data/paired/S.trifoliorum/R316/R
   cp $RawDatDir/Run\ 1/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run1_F_fq.gz
-  cp $RawDatDir/Run\ 1/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run1_R_fq.gz
-  cp $RawDatDir/Run\ 2/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run2_F_fq.gz
-  cp $RawDatDir/Run\ 2/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run2_R_fq.gz
-  cp $RawDatDir/Run\ 3/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/R316_run3_F_fq.gz
-  cp $RawDatDir/Run\ 3/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/R316_run3_R_fq.gz
-
+  cp $RawDatDir/Run\ 1/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
+  cp $RawDatDir/Run\ 2/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
+  cp $RawDatDir/Run\ 2/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
+  cp $RawDatDir/Run\ 3/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
+  cp $RawDatDir/Run\ 3/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
+  cp $RawDatDir/Run\ 4/R316_S3_L001_R1_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/F/.
+  cp $RawDatDir/Run\ 4/R316_S3_L001_R2_001.fastq.gz  raw_data/paired/S.trifoliorum/R316/R/.
 
   # S5
   mkdir -p raw_data/paired/S.minor/S5/F
   mkdir -p raw_data/paired/S.minor/S5/R
-  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run1_F_fq.gz
-  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run1_R_fq.gz
-  cp $RawDatDir/Run\ 2/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run2_F_fq.gz
-  cp $RawDatDir/Run\ 2/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run2_R_fq.gz
-  cp $RawDatDir/Run\ 3/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/S5_run3_F_fq.gz
-  cp $RawDatDir/Run\ 3/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/S5_run3_R_fq.gz
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/F/.
+  cp $RawDatDir/Run\ 1/Sminor_S5_L001_R1_001.fastq.gz  raw_data/paired/S.minor/S5/R/.
+
 ```
 
 
@@ -199,6 +200,7 @@ A range of hash lengths were used and the best assembly selected for subsequent 
 ```
 
 #Re-run assembly for Sclerotinia sclerotiorum P7
+```bash
  for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
   echo $StrainPath
 	ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
@@ -249,9 +251,11 @@ echo $OutDir
     $ProgDir/remove_contaminants.py --inp $AssFiltered --out $AssRenamed --coord_file editfile.tab
     rm editfile.tab
 done
+```
 
 #Quast to summarise statistics
 
+```bash
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
 for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
     Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
@@ -294,25 +298,75 @@ Gene models were used to predict genes in the Neonectria genome. This used resul
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 
 ```bash
-
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+ProgDir=/home/ransoe/git_repos/tools/gene_prediction/cegma
+    qsub $ProgDir/sub_cegma.sh $Assembly dna
+    done
 ```
+Results were viewed in completeness report, gff and fa. 
 
 ** Number of cegma genes present and complete:
 ** Number of cegma genes present and partial:
 
-##Gene prediction
+###Gene predictions
+
+##Gene prediction part 1- Gene model predictions using Augustus
 
 Gene prediction was performed for the neonectria genome.
 CEGMA genes were used as Hints for the location of CDS.
 
 ```bash
-
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+ 	Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+ 	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo $Strain
+    echo $Organism
+    OutDir=gene_pred/augustus/$Organism/$Strain
+    ProgDir=/home/ransoe/git_repos/tools/gene_prediction/augustus
+    GeneModel=botrytis_cinerea
+    qsub $ProgDir/submit_augustus.sh $GeneModel $Assembly false $OutDir
+done
 ```
 
 ** Number of genes predicted:
 
+```bash
+##Gene prediction part 2- Gene model predictions using ORFs
+
+Open reading frame predictions were made using the run_ORF_finder.sh.
+
+ProgDir=/home/ransoe/git_repos/tools/gene_prediction/ORF_finder
+for Genome in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    qsub $ProgDir/run_ORF_finder.sh $Genome
+done
+``` 
+ 
+ The Gff files from the the ORF finder are not in true Gff3 format. These were corrected using the following commands:
+ 
+```bash
+for ORF_Gff in $(ls gene_pred/ORF_finder/S.*/*/*_ORF.gff); do
+	Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+ 	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    ProgDir=home/ransoe/git_repos/tools/seq_tools/feature_annotation
+    ORF_Gff_mod=gene_pred/ORF_finder/$Organism/$Strain/"$Strain"_ORF_corrected.gff3
+    $ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
+done 
+ ```
+ 
 #Functional annotation
 
+##Genes with homology to PHIbase
+Predicted gene models were searched against the PHIbase database using tBLASTx.
+
+```bash
+for Subject in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+    Query=../../phibase/v3.8/PHI_accessions.fa
+    qsub $ProgDir/blast_pipe.sh $Query protein $Subject
+done
+```
+
+##Interproscan
 Interproscan was used to give gene models functional annotations.
 
 ```bash
@@ -327,12 +381,6 @@ Interproscan was used to give gene models functional annotations.
 The first analysis was based upon BLAST searches for genes known to be involved in toxin production
 
 
-##Genes with homology to PHIbase
-Predicted gene models were searched against the PHIbase database using tBLASTx.
-
-```bash
-
-```
 
 Top BLAST hits were used to annotate gene models.
 
