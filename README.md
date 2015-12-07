@@ -145,7 +145,23 @@ kmer counting was performed using kmc.
 This allowed estimation of sequencing depth and total genome size:
 
 ```bash
-
+for StrainPath in $(ls -d qc_dna/paired/S.*/*); do 
+echo $StrainPath
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/dna_qc
+TrimF1_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run1'); 
+TrimR1_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run1');
+TrimF2_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run2'); 
+TrimR2_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run2'); 
+TrimF3_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run3'); 
+TrimR3_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run3'); 
+echo $TrimF1_Read 
+echo $TrimR1_Read
+echo $TrimF2_Read
+echo $TrimR2_Read
+echo $TrimF3_Read
+echo $TrimR3_Read
+qsub $ProgDir/kmc_kmer_counting.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read
+done
 ```
 
 ** Estimated Genome Size is:
@@ -159,15 +175,55 @@ A range of hash lengths were used and the best assembly selected for subsequent 
 
 
 ```bash
-
+  for StrainPath in $(ls -d qc_dna/paired/S.*/*); do
+  echo $StrainPath
+	ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
+    Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+    Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+    echo $Strain
+    echo $Organism
+    TrimF1_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run1');
+    TrimR1_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run1');
+    TrimF2_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run2');
+    TrimR2_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run2');
+    TrimF3_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run3');
+    TrimR3_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run3');
+    echo $TrimF1_Read
+    echo $TrimR1_Read
+    echo $TrimF2_Read
+    echo $TrimR2_Read
+    echo $TrimF3_Read
+    echo $TrimR3_Read
+    OutDir=assembly/spades/$Organism/$Strain
+    qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
+  done
 ```
 
-Quast
-
-```bash
-
-```
-
+#Re-run assembly for Sclerotinia sclerotiorum P7
+ for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
+  echo $StrainPath
+	ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
+    Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+    Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+    echo $Strain
+    echo $Organism
+    TrimF1_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run1');
+    TrimR1_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run1');
+    TrimF2_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run2');
+    TrimR2_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run2');
+    TrimF3_Read=$(ls $StrainPath/F/*.fq.gz | grep 'run3');
+    TrimR3_Read=$(ls $StrainPath/R/*.fq.gz | grep 'run3');
+    echo $TrimF1_Read
+    echo $TrimR1_Read
+    echo $TrimF2_Read
+    echo $TrimR2_Read
+    echo $TrimF3_Read
+    echo $TrimR3_Read
+    OutDir=assembly/spades/$Organism/$Strain
+    qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
+  done 
+  ```
+  
 Assemblies were summarised to allow the best assembly to be determined by eye.
 
 ** Assembly stats are:
@@ -179,20 +235,37 @@ Assemblies were summarised to allow the best assembly to be determined by eye.
   **
 
 
-
-
-### Renaming contigs
-
-Contigs were renamed in accordance with ncbi recomendations.
+#Quast
+#Re name the contigs to contig names to an acceptable format for NCBI
 
 ```bash
+for OutDir in $(ls -d assembly/spades/S.*/*/filtered_contigs); do
+echo $OutDir
+    ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    AssFiltered=$OutDir/contigs_min_500bp.fasta
+    AssRenamed=$OutDir/contigs_min_500bp_renamed.fasta
+    echo $AssFiltered
+    echo $AssRenamed
+    printf '.\t.\t.\t.\n' > editfile.tab
+    $ProgDir/remove_contaminants.py --inp $AssFiltered --out $AssRenamed --coord_file editfile.tab
+    rm editfile.tab
+done
 
+#Quast to summarise statistics
+
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo $Strain
+    echo $Organism
+    OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+
+See report.txt output. 
 ```
 
-We run Quast again.
-```bash
-
-```
 
 # Repeat masking
 Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
@@ -200,7 +273,12 @@ Repeat masking was performed and used the following programs: Repeatmasker Repea
 The best assembly was used to perform repeatmasking
 
 ```bash
-
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    echo $BestAss
+    qsub $ProgDir/rep_modeling.sh $BestAss
+    qsub $ProgDir/transposonPSI.sh $BestAss
+done
  ```
 
 ** % bases masked by repeatmasker:
