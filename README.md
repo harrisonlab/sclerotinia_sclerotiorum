@@ -5,6 +5,17 @@ Sclerotinia sclerotiorum
 ====================
 
 
+Useful notes
+
+To kill multiple running command:
+
+```bash
+for num in $(seq 6359130 6359131); do
+echo $num
+qdel $num
+done
+```
+
 Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory:
 ```bash
 mkdir -p /home/groups/harrisonlab/project_files/Sclerotinia_spp
@@ -99,7 +110,6 @@ ProgDir=~/git_repos/tools/seq_tools/dna_qc;
 qsub $ProgDir/run_fastqc.sh $RawData;
 done
 ```
-
 
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
 This was done with fastq-mcf.
@@ -289,6 +299,7 @@ done
 ** % bases masked by transposon psi: **
 
 
+
 # Gene Prediction
 Gene prediction followed two steps:
 Pre-gene prediction - Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified.
@@ -325,6 +336,12 @@ for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta)
     ProgDir=/home/ransoe/git_repos/tools/gene_prediction/augustus
     GeneModel=botrytis_cinerea
     qsub $ProgDir/submit_augustus.sh $GeneModel $Assembly false $OutDir
+done
+```
+Count the number of genes in each gene prediction output
+```bash
+for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+cat $Genes |grep '>' |wc -l; 
 done
 ```
 
@@ -369,15 +386,81 @@ done
 ##Interproscan
 Interproscan was used to give gene models functional annotations.
 
+To run using my interproscan
 ```bash
-
+for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+echo $Genes
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/interproscan
+$ProgDir/sub_interproscan.sh $Genes
+done
 ```
 
+To run using Andy's interproscan
 ```bash
-
+for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+echo $Genes
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+$ProgDir/sub_interproscan.sh $Genes
+done 
 ```
+
 
 #Genomic analysis
+
+#Signal peptide prediction
+
+
+```bash
+for Proteome in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+SplitfileDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+SplitDir=gene_pred/augustus_split/$Organism/$Strain
+mkdir -p $SplitDir
+BaseName="$Organism""_$Strain"_augustus_preds
+$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+for File in $(ls $SplitDir/*_augustus_preds_*); do
+Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+while [ $Jobs -ge 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+done
+printf "\n"
+echo $File
+# qsub $ProgDir/pred_sigP.sh $File
+qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+done
+done
+```
+
+The batch files of predicted secreted proteins needed to be combined into a
+single file for each strain. This was done with the following commands:
+```bash
+for SplitDir in $(ls -d gene_pred/augustus_preds/augustus/S.*); do
+Strain=$(echo $SplitDir | rev | cut -d '/' -f3 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f4 | rev)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=augustus_signalP-4.1
+for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+	InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+	InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+	InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+	InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+done 
+
+
+```
+
 The first analysis was based upon BLAST searches for genes known to be involved in toxin production
 
 
