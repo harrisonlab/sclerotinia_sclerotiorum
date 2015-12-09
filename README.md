@@ -319,6 +319,8 @@ Results were viewed in completeness report, gff and fa.
 ** Number of cegma genes present and complete:
 ** Number of cegma genes present and partial:
 
+###Functional annotation
+
 ###Gene predictions
 
 ##Gene prediction part 1- Gene model predictions using Augustus
@@ -370,7 +372,7 @@ for ORF_Gff in $(ls gene_pred/ORF_finder/S.*/*/*_ORF.gff); do
 done 
  ```
  
-#Functional annotation
+##Genomic analysis
 
 ##Genes with homology to PHIbase
 Predicted gene models were searched against the PHIbase database using tBLASTx.
@@ -404,8 +406,6 @@ $ProgDir/sub_interproscan.sh $Genes
 done 
 ```
 
-
-#Genomic analysis
 
 #Signal peptide prediction
 
