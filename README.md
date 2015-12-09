@@ -372,20 +372,7 @@ for ORF_Gff in $(ls gene_pred/ORF_finder/S.*/*/*_ORF.gff); do
 done 
  ```
  
-##Genomic analysis
-
-##Genes with homology to PHIbase
-Predicted gene models were searched against the PHIbase database using tBLASTx.
-
-```bash
-for Subject in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
-    ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
-    Query=../../phibase/v3.8/PHI_accessions.fa
-    qsub $ProgDir/blast_pipe.sh $Query protein $Subject
-done
-```
-
-##Interproscan
+ ##Interproscan
 Interproscan was used to give gene models functional annotations.
 
 To run using my interproscan
@@ -405,6 +392,208 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/inte
 $ProgDir/sub_interproscan.sh $Genes
 done 
 ```
+
+STILL NEED TO RUN!
+Append interpro scan (join all of the output files together into one single text document)
+```bash
+for Genes in $(ls 
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/interproscan
+Genes=gene_pred/augustus/N.ditissima/R0905_v2/R0905_v2_EMR_aug_out.aa
+InterProRaw=gene_pred/interproscan/N.ditissima/R0905_v2/raw
+$ProgDir/append_interpro.sh $Genes $InterProRaw
+```
+
+##SwissProt
+
+```bash
+qlogin
+ProjDir=/home/groups/harrisonlab/project_files/Sclerotinia_spp
+cd $ProjDir
+for Proteins in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+Strain=$(echo $Proteins | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
+echo $Strain
+echo $Organism
+OutDir=$ProjDir/gene_pred/uniprot/$Organism/$Strain
+mkdir -p $OutDir
+blastp \
+-db /home/groups/harrisonlab/uniprot/swissprot/uniprot_sprot \
+-query $Proteins \
+-out $OutDir/swissprot_v2015_09_hits.tbl  \
+-evalue 1e-100 \
+-outfmt 6 \
+-num_threads 8 \
+-num_alignments 10
+done
+
+```
+ 
+##Genomic analysis
+
+##BLASTs
+
+##Genes with homology to PHIbase
+Predicted gene models were searched against the PHIbase database using tBLASTx.
+
+```bash
+for Subject in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+    Query=../../phibase/v3.8/PHI_accessions.fa
+    qsub $ProgDir/blast_pipe.sh $Query protein $Subject
+done
+```
+
+Following blasting PHIbase to the genome, the hits were filtered by effect on virulence.
+
+The following commands were used to do this:
+
+```bash
+for pathway in $(ls analysis/blast_homology/S.*/*/*_PHI_accessions.fa_homologs.csv); do
+Strain=$(echo $pathway | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $pathway | rev | cut -d '/' -f3 | rev)
+echo $Organism
+echo $Strain
+paste -d '\t' ../../phibase/v3.8/PHI_headers.csv ../../phibase/v3.8/PHI_virulence.csv $pathway | cut -f-3,1185- > analysis/blast_homology/$Organism/$Strain/"$Strain"_PHIbase.csv
+cat analysis/blast_homology/$Organism/$Strain/"$Strain"_PHIbase.csv | grep 'contig' | cut -f2 | sort | uniq -c
+done  
+```
+
+#Output:
+S.minor
+S5
+      1  
+      3 chemistry target
+     37 Chemistry target
+      7  effector (plant avirulence determinant)
+      9 Effector (plant avirulence determinant)
+      2 Enhanced antagonism
+      8  increased virulence
+      4  increased virulence (Hypervirulence)
+      1 Increased virulence (hypervirulence)
+     21 Increased virulence (Hypervirulence)
+     78 Lethal
+     12  loss of pathogenicity
+    235 Loss of pathogenicity
+      7  mixed outcome
+     50  mixed outcome
+     81 Mixed outcome
+     65  reduced virulence
+     12 reduced virulence
+    677 Reduced virulence
+      1 Reduced Virulence
+     29  unaffected pathogenicity
+    652 Unaffected pathogenicity
+      1 Wild-type mutualism
+S.sclerotiorum
+DG4
+      1  
+      3 chemistry target
+     37 Chemistry target
+      7  effector (plant avirulence determinant)
+      7 Effector (plant avirulence determinant)
+      2 Enhanced antagonism
+      8  increased virulence
+      4  increased virulence (Hypervirulence)
+      1 Increased virulence (hypervirulence)
+     21 Increased virulence (Hypervirulence)
+     80 Lethal
+     12  loss of pathogenicity
+    234 Loss of pathogenicity
+      7  mixed outcome
+     50  mixed outcome
+     81 Mixed outcome
+     64  reduced virulence
+     12 reduced virulence
+    679 Reduced virulence
+      1 Reduced Virulence
+     29  unaffected pathogenicity
+    655 Unaffected pathogenicity
+      1 Wild-type mutualism
+S.sclerotiorum
+P7
+S.subartica
+HE1
+      1  
+      3 chemistry target
+     37 Chemistry target
+      6  effector (plant avirulence determinant)
+      2 Effector (plant avirulence determinant)
+      1 Enhanced antagonism
+      6  increased virulence
+      2  increased virulence (Hypervirulence)
+      1 Increased virulence (hypervirulence)
+     15 Increased virulence (Hypervirulence)
+     56 Lethal
+      8  loss of pathogenicity
+    191 Loss of pathogenicity
+      4  mixed outcome
+     36  mixed outcome
+     72 Mixed outcome
+     54  reduced virulence
+      8 reduced virulence
+    539 Reduced virulence
+      1 Reduced Virulence
+     21  unaffected pathogenicity
+    325 Unaffected pathogenicity
+S.trifoliorum
+R316
+      1  
+      3 chemistry target
+     37 Chemistry target
+      8  effector (plant avirulence determinant)
+      7 Effector (plant avirulence determinant)
+      2 Enhanced antagonism
+      8  increased virulence
+      4  increased virulence (Hypervirulence)
+      1 Increased virulence (hypervirulence)
+     21 Increased virulence (Hypervirulence)
+     78 Lethal
+     12  loss of pathogenicity
+    233 Loss of pathogenicity
+      7  mixed outcome
+     50  mixed outcome
+     81 Mixed outcome
+     64  reduced virulence
+     12 reduced virulence
+    678 Reduced virulence
+      1 Reduced Virulence
+     29  unaffected pathogenicity
+    650 Unaffected pathogenicity
+      1 Wild-type mutualism
+
+##Blasting against genes of interest
+
+```bash
+mkdir -p sclerotina_pub_genes
+nano sclerotina_pub_genes/pub_genes.fa
+
+ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+Query=analysis/blast_homology/sclerotina_pub_genes/pub_genes.fa 
+for Assembly in $(ls assembly/spades/S.*/*/filtered_contigs/*_500bp_renamed.fasta); do
+echo $Assembly
+qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+done
+```
+Once blast searches had completed, the BLAST hits were converted to GFF
+annotations:
+
+NumHits --> top number of blast hits to take e.g. NumHits=3 will take the top three blast hits. 
+
+```bash
+ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+for BlastHits in $(ls analysis/blast_homology/S.*/*/*_pub_genes.fa_homologs.csv); do
+Strain=$(echo $BlastHits | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $BlastHits | rev | cut -d '/' -f3 | rev)
+echo $Strain
+echo $Organism
+HitsGff=analysis/blast_homology/$Organism/$Strain/"$Strain"_pub_genes.fa_homologs.gff
+Column2=Blast_homolog
+NumHits=3
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+done
+```
+
+
 
 
 #Signal peptide prediction
