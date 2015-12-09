@@ -1,11 +1,11 @@
 ###Orthology analysis
 
-###My Sclerotinia species
-##S.minor S5
-##S.subartica HE1
-##S.sclerotiorum DG4
-##S.sclerotiorum P7
-##S.trifoliorum R316
+My Sclerotinia species
+S.minor S5
+S.subartica HE1
+S.sclerotiorum DG4
+S.sclerotiorum P7
+S.trifoliorum R316
 
 ###Previously assembled species
 ##S.sclerotiorum 1980
