@@ -1,16 +1,18 @@
-###Orthology analysis
+#Orthology analysis
 
+```bash
 My Sclerotinia species
 S.minor S5
 S.subartica HE1
 S.sclerotiorum DG4
 S.sclerotiorum P7
 S.trifoliorum R316
+```
 
-###Previously assembled species
+#Previously assembled species
 ##S.sclerotiorum 1980
 
-#Make directory to perform analysis in.
+Make directory to perform analysis in.
 #First comparison with the four proteomes I currently have and 1980 (published Sclerotinia sclerotiorum genome) 
 
   ProjDir=/home/groups/harrisonlab/project_files/Sclerotinia_spp
@@ -23,9 +25,9 @@ S.trifoliorum R316
   mkdir -p $WorkDir/badProteins  
   
   
-###Format fasta files
+#Format fasta files
 
-### for S.minor S5
+## for S.minor S5
 ```bash
   Taxon_code=Smin
   Fasta_file=gene_pred/augustus/S.minor/S5/S5_EMR_singlestrand_aug_out.aa
@@ -34,7 +36,7 @@ S.trifoliorum R316
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### for S.subartica HE1
+## for S.subartica HE1
 ```bash
   Taxon_code=Ssub
   Fasta_file=gene_pred/augustus/S.subartica/HE1/HE1_EMR_singlestrand_aug_out.aa
@@ -43,7 +45,7 @@ S.trifoliorum R316
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### for S.sclerotiorum DG4
+## for S.sclerotiorum DG4
 
 ```bash
 Taxon_code=Ssc1
@@ -52,7 +54,7 @@ Id_field=1
 orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
 mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
-### for S.trifoliorum R316
+## for S.trifoliorum R316
 
 ```bash
 Taxon_code=Stri
@@ -62,7 +64,7 @@ orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
 mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-### for S.sclerotiorum 1980
+## for S.sclerotiorum 1980
 
 ```bash
   Taxon_code=Ssc2
@@ -72,7 +74,7 @@ mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
   mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```  
 
-###Filter proteins into good and poor sets.
+##Filter proteins into good and poor sets.
 
   Input_dir=$WorkDir/formatted
   Min_length=10
@@ -82,7 +84,7 @@ mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
   orthomclFilterFasta $Input_dir $Min_length $Max_percent_stops $Good_proteins_file $Poor_proteins_file
 
 
-###Perform an all-vs-all blast of the proteins
+##Perform an all-vs-all blast of the proteins
 
   BlastDB=$WorkDir/blastall/$IsolateAbrv.db
 
