@@ -1,15 +1,21 @@
-###Ortholog comparison
+###Orthology analysis
 
-###For a comparison between Sclerotinia species
+###My Sclerotinia species
 ##S.minor S5
 ##S.subartica HE1
 ##S.sclerotiorum DG4
 ##S.sclerotiorum P7
 ##S.trifoliorum R316
 
-  ProjDir=/home/groups/harrisonlab/project_files/S.sclerotiorum
+###Previously assembled species
+##S.sclerotiorum 1980
+
+#Make directory to perform analysis in.
+#First comparison with the four proteomes I currently have and 1980 (published Sclerotinia sclerotiorum genome) 
+
+  ProjDir=/home/groups/harrisonlab/project_files/Sclerotinia_spp
   cd $ProjDir
-  IsolateAbrv=S5_HE1_DG4_P7_R316
+  IsolateAbrv=S5_HE1_Ssc1_R316_Ssc2
   WorkDir=analysis/orthology/orthomcl/$IsolateAbrv
   mkdir -p $WorkDir
   mkdir -p $WorkDir/formatted
@@ -19,15 +25,52 @@
   
 ###Format fasta files
 
-for Fasta_file in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-Taxon_code=$Strain
+### for S.minor S5
+```bash
+  Taxon_code=Smin
+  Fasta_file=gene_pred/augustus/S.minor/S5/S5_EMR_singlestrand_aug_out.aa
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for S.subartica HE1
+```bash
+  Taxon_code=Ssub
+  Fasta_file=gene_pred/augustus/S.subartica/HE1/HE1_EMR_singlestrand_aug_out.aa
+  Id_field=1
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for S.sclerotiorum DG4
+
+```bash
+Taxon_code=Ssc1
+Fasta_file=gene_pred/augustus/S.sclerotiorum/DG4/DG4_EMR_singlestrand_aug_out.aa
 Id_field=1
 orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
-mv "$Taxon_code".fasta $WorkDir/formatted/"Taxon_code".fasta
-done
+mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+### for S.trifoliorum R316
 
+```bash
+Taxon_code=Stri
+Fasta_file=gene_pred/augustus/S.trifoliorum/R316/R316_EMR_singlestrand_aug_out.aa
+Id_field=1
+orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```
+
+### for S.sclerotiorum 1980
+
+```bash
+  Taxon_code=Ssc2
+  Fasta_file=Sclerotinia_genome/Sclsc1_GeneCatalog_proteins_20110903.aa.fasta
+  Id_field=4
+  orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
+  mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
+```  
 
 ###Filter proteins into good and poor sets.
 
@@ -50,20 +93,20 @@ done
   SplitDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/signal_peptides
   $SplitDir/splitfile_500.py --inp_fasta $Good_proteins_file --out_dir $WorkDir/splitfiles --out_base goodProteins
 
-  ProgDir=/home/ransoe/git_repos/scripts/phytophthora/pathogen/orthology  
+  ProgDir=/home/armita/git_repos/emr_repos/scripts/phytophthora/pathogen/orthology  
   for File in $(find $WorkDir/splitfiles); do
-    Jobs=$(qstat | grep 'blast_500' | wc -l)
-    while [ $Jobs -gt 32 ]; do
+    Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
+    while [ $Jobs -gt 1 ]; do
       sleep 10
       printf "."
-      Jobs=$(qstat | grep 'blast_500' | wc -l)
+      Jobs=$(qstat | grep 'blast_500' | grep 'qw' | wc -l)
     done
     printf "\n"
     echo $File
     BlastOut=$(echo $File | sed 's/.fa/.tab/g')
     qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
   done
-
+ 
 ###Merge the all-vs-all blast results
 
   MergeHits="$IsolateAbrv"_blast.tab
@@ -106,89 +149,6 @@ Isolate name (total number of orthogroups) number of unique singleton genes numb
   [1] 642
   [1] 153
   NULL
-Downstream analysis
-Particular orthogroups were analysed for expansion in isolates.
 
-This section details the commands used and the results observed.
 
-P. cactotum unique gene families
-
-The genes unique to P.cactorum were identified within the orthology analysis.
-
-First variables were set:
-
-  WorkDir=analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj
-  PcacUniqDir=$WorkDir/Pcac_unique
-  Orthogroups=$WorkDir/Pcac_Pinf_Ppar_Pcap_Psoj_orthogroups.txt
-  GoodProts=$WorkDir/goodProteins/goodProteins.fasta
-  Braker_genes=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus.aa
-  Uniq_Pcac_groups=$PcacUniqDir/Pcac_uniq_orthogroups.txt
-  mkdir -p $PcacUniqDir
-Orthologroups only containing P.cactorum 10300 genes were extracted:
-
-  cat $Orthogroups | grep -v 'Pinf' | grep -v 'Ppar' | grep -v 'Pcap' | grep -v 'Psoj' > $Uniq_Pcac_groups
-  echo "The number of orthogroups unique to P. cactorum are:"
-  cat $Uniq_Pcac_groups | wc -l
-  echo "The following number genes are contained in these orthogorups:"
-  cat $Uniq_Pcac_groups | grep -o 'Pcac|' | wc -l  
-  The number of orthogroups unique to P. cactorum are:
-  126
-  The following number genes are contained in these orthogorups:
-  347
-P. cactorum unique RxLR families
-
-P. cactorum strain 10300 RxLR genes were parsed to the same format as the gene names used in the analysis:
-
-  RxLR_Names_10300=analysis/RxLR_effectors/combined_evidence/P.cactorum/10300/10300_Aug_RxLR_EER_motif_hmm_headers.txt
-  WorkDir=analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj
-  RxLR_Dir=$WorkDir/Pcac_RxLR
-  Orthogroups=$WorkDir/Pcac_Pinf_Ppar_Pcap_Psoj_orthogroups.txt
-  RxLR_ID_10300=$RxLR_Dir/10300_aug_RxLR_EER_IDs.txt
-  mkdir -p $RxLR_Dir
-  cat $RxLR_Names_10300 | sed 's/g/Pcac|g/g' > $RxLR_ID_10300
-Ortholog groups containing RxLR proteins were identified using the following commands:
-
-  echo "The number of RxLRs searched for is:"
-  cat $RxLR_ID_10300 | wc -l
-  echo "Of these, the following number were found in orthogroups:"
-  RxLR_Orthogroup_hits_10300=$RxLR_Dir/Pcac_RxLR_Orthogroups_hits.txt
-  cat $Orthogroups | grep -o -w -f $RxLR_ID_10300 > $RxLR_Orthogroup_hits_10300
-  cat $RxLR_Orthogroup_hits_10300 | wc -l
-  echo "These were distributed through the following number of Orthogroups:"
-  RxLR_Orthogroup_10300=$RxLR_Dir/Pcac_RxLR_Orthogroups.txt
-  cat $Orthogroups | grep -w -f $RxLR_ID_10300 > $RxLR_Orthogroup_10300
-  cat $RxLR_Orthogroup_10300 | wc -l
-  echo "The following RxLRs were found in Pcac unique orthogroups:"
-  RxLR_Pcac_uniq_groups=$RxLR_Dir/Pcac_RxLR_Orthogroups_hits.txt
-  cat $RxLR_Orthogroup_10300 | grep -v 'Pinf' | grep -v 'Ppar' | grep -v 'Pcap' | grep -v 'Psoj' > $RxLR_Pcac_uniq_groups
-  cat $RxLR_Pcac_uniq_groups | wc -l
-  echo "The following RxLRs were found in Group1 unique orthogroups:"
-  RxLR_Group1_uniq_groups=$RxLR_Dir/Group1_RxLR_Orthogroups_hits.txt
-  cat $RxLR_Orthogroup_10300 | grep -v 'Pcap' | grep -v 'Psoj' > $RxLR_Group1_uniq_groups
-  cat $RxLR_Group1_uniq_groups | wc -l
-  The number of RxLRs searched for is:
-  145
-  Of these, the following number were found in orthogroups:
-  145
-  These were distributed through the following number of Orthogroups:
-  79
-  The following RxLRs were found in Pcac unique orthogroups:
-  2
-  The following RxLRs were found in Group1 unique orthogroups:
-  17
-The P.cactorum RxLR genes that were not found in orthogroups were identified:
-
-  RxLR_10300_uniq=$RxLR_Dir/Pcac_unique_RxLRs.txt
-  cat $RxLR_ID_10300 | grep -v -w -f $RxLR_Orthogroup_hits_10300 | tr -d 'Pcac|' > $RxLR_10300_uniq
-  echo "The number of P.cac 10300 unique RxLRs are:"
-  cat $RxLR_10300_uniq | wc -l
-  RxLR_Seq_10300=analysis/RxLR_effectors/combined_evidence/P.cactorum/10300/10300_Aug_RxLR_EER_motif_hmm.fa
-  Braker_genes=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus.aa
-  RxLR_10300_uniq_fa=$RxLR_Dir/Pcac_unique_RxLRs.fa
-  cat $Braker_genes | sed -e 's/\(^>.*$\)/#\1#/' | tr -d "\r" | tr -d "\n" | sed -e 's/$/#/' | tr "#" "\n" | sed -e '/^$/d' | grep -w -A1 -f $RxLR_10300_uniq | grep -E -v '^--' > $RxLR_10300_uniq_fa
-  The number of P.cac 10300 unique RxLRs are:
-  0
-  mkdir -p analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/orthogroups_fasta_Pcac_RxLR
-  ~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL/orthoMCLgroups2fasta.py --orthogroups analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/Pcac_RxLR_Orthogroups.txt --fasta analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/goodProteins/goodProteins.fasta --out_dir analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/orthogroups_fasta_Pcac_RxLR
-  mkdir -p analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/orthogroups_fasta_clade1_RxLR
-  ~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL/orthoMCLgroups2fasta.py --orthogroups analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/Group1_RxLR_Orthogroups_hits.txt --fasta analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/goodProteins/goodProteins.fasta --out_dir analysis/orthology/orthomcl/Pcac_Pinf_Ppar_Pcap_Psoj/Pcac_RxLR/orthogroups_fasta_clade1_RxLR
+See downstream analysis in original P.cactorum file for specific analysis after this point
