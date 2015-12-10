@@ -1,11 +1,11 @@
-# sclerotinia_sclerotiorum
+# Sclerotinia_sclerotiorum
 Commands used fr the analysis of Sclerotinia spp. genomes
 
 Sclerotinia sclerotiorum
 ====================
 
 
-Useful notes
+##Useful notes
 
 To kill multiple running command:
 
@@ -16,7 +16,10 @@ qdel $num
 done
 ```
 
-Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory:
+#Genome Assembly
+Commands used during analysis of the Sclerotinia sclerotiorum genome. 
+Note - all this work was performed in the directory:
+
 ```bash
 mkdir -p /home/groups/harrisonlab/project_files/Sclerotinia_spp
 cd /home/groups/harrisonlab/project_files/Sclerotinia_spp
@@ -96,10 +99,10 @@ and annotation.
 
 ```
 
+#Draft Genome assembly
+##Data qc
 
-#Data qc
-
-programs: fastqc fastq-mcf kmc
+To assess the reads for quality. Programs: fastqc fastq-mcf kmc
 
 Data quality was visualised using fastqc:
 
@@ -110,10 +113,10 @@ ProgDir=~/git_repos/tools/seq_tools/dna_qc;
 qsub $ProgDir/run_fastqc.sh $RawData;
 done
 ```
+##Data trimming
 
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
 This was done with fastq-mcf.
-
 
 ```bash
 for StrainPath in $(ls -d raw_data/paired/S.*/*); do
@@ -150,7 +153,7 @@ qsub $ProgDir/run_fastqc.sh $TrimData;
 done
 ```
 
-
+##Kmer counting
 kmer counting was performed using kmc.
 This allowed estimation of sequencing depth and total genome size:
 
@@ -178,11 +181,10 @@ done
 
 ** Esimated Coverage is:
 
-#Assembly
+#Genome Assembly
 Assembly was performed using: Spades
 
-A range of hash lengths were used and the best assembly selected for subsequent analysis
-
+A range of hash lengths were used and the best assembly selected for subsequent analysis.
 
 ```bash
   for StrainPath in $(ls -d qc_dna/paired/S.*/*); do
@@ -209,7 +211,7 @@ A range of hash lengths were used and the best assembly selected for subsequent 
   done
 ```
 
-#Re-run assembly for Sclerotinia sclerotiorum P7
+##Re-run assembly for Sclerotinia sclerotiorum P7
 ```bash
  for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
   echo $StrainPath
@@ -234,6 +236,9 @@ A range of hash lengths were used and the best assembly selected for subsequent 
     qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
   done 
   ```
+
+###NB: 10/12/15: This hasn't worked, go back and assemble this again. Continue from this point with other 4 assemblies. 
+
   
 Assemblies were summarised to allow the best assembly to be determined by eye.
 
@@ -247,7 +252,8 @@ Assemblies were summarised to allow the best assembly to be determined by eye.
 
 
 #Quast
-#Re name the contigs to contig names to an acceptable format for NCBI
+
+##Re name the contigs to contig names to an acceptable format for NCBI
 
 ```bash
 for OutDir in $(ls -d assembly/spades/S.*/*/filtered_contigs); do
@@ -263,7 +269,7 @@ echo $OutDir
 done
 ```
 
-#Quast to summarise statistics
+##Quast to summarise statistics
 
 ```bash
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
@@ -278,7 +284,6 @@ done
 
 See report.txt output. 
 ```
-
 
 # Repeat masking
 Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
@@ -299,8 +304,7 @@ done
 ** % bases masked by transposon psi: **
 
 
-
-# Gene Prediction
+#Gene Prediction
 Gene prediction followed two steps:
 Pre-gene prediction - Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified.
 Gene models were used to predict genes in the Neonectria genome. This used results from CEGMA as hints for gene models.
@@ -319,9 +323,6 @@ Results were viewed in completeness report, gff and fa.
 ** Number of cegma genes present and complete:
 ** Number of cegma genes present and partial:
 
-###Functional annotation
-
-###Gene predictions
 
 ##Gene prediction part 1- Gene model predictions using Augustus
 
@@ -372,6 +373,8 @@ for ORF_Gff in $(ls gene_pred/ORF_finder/S.*/*/*_ORF.gff); do
 done 
  ```
  
+ #Funtional annotation
+ 
  ##Interproscan
 Interproscan was used to give gene models functional annotations.
 
@@ -393,7 +396,7 @@ $ProgDir/sub_interproscan.sh $Genes
 done 
 ```
 
-STILL NEED TO RUN!
+###STILL NEED TO RUN
 Append interpro scan (join all of the output files together into one single text document)
 ```bash
 for Genes in $(ls 
@@ -428,7 +431,7 @@ done
 
 ```
  
-##Genomic analysis
+#Genomic analysis
 
 ##BLASTs
 
@@ -458,7 +461,7 @@ cat analysis/blast_homology/$Organism/$Strain/"$Strain"_PHIbase.csv | grep 'cont
 done  
 ```
 
-#Output:
+###Output:
 S.minor
 S5
       1  
@@ -593,10 +596,7 @@ $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 done
 ```
 
-
-
-
-#Signal peptide prediction
+##Signal peptide prediction
 
 
 ```bash
@@ -624,6 +624,7 @@ done
 done
 ```
 
+###STLILL NEED TO DO THIS!
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
@@ -646,19 +647,7 @@ cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
 tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
 cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
 done 
-
-
 ```
-
-The first analysis was based upon BLAST searches for genes known to be involved in toxin production
-
-
-
-Top BLAST hits were used to annotate gene models.
-
-```bash
-
-```
-
-** Blast results of note: **
-  * 'Result A'
+#Orthology analysis
+Analysis of orthologs between species was carried out using orthomcl.
+This is documented in the text file: Orthologs.md
