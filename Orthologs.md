@@ -27,6 +27,8 @@ Make directory to perform analysis in.
   
 #Format fasta files
 
+NB: Taxon code must not be more than 4 characters/numbers long and must start with a character
+
 ## for S.minor S5
 ```bash
   Taxon_code=Smin
@@ -108,8 +110,9 @@ mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
     BlastOut=$(echo $File | sed 's/.fa/.tab/g')
     qsub $ProgDir/blast_500.sh $BlastDB $File $BlastOut
   done
- 
-###Merge the all-vs-all blast results
+  
+###BELOW THIS POINT NOT COMPLETED!
+##Merge the all-vs-all blast results
 
   MergeHits="$IsolateAbrv"_blast.tab
   printf "" > $MergeHits
