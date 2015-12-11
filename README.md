@@ -396,14 +396,17 @@ $ProgDir/sub_interproscan.sh $Genes
 done 
 ```
 
-###STILL NEED TO RUN
 Append interpro scan (join all of the output files together into one single text document)
 ```bash
-for Genes in $(ls 
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/interproscan
-Genes=gene_pred/augustus/N.ditissima/R0905_v2/R0905_v2_EMR_aug_out.aa
-InterProRaw=gene_pred/interproscan/N.ditissima/R0905_v2/raw
+for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
+Strain=$(echo $Genes | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $Genes | rev | cut -d '/' -f3 | rev)
+echo $Strain
+echo $Organism
+InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
 $ProgDir/append_interpro.sh $Genes $InterProRaw
+done
 ```
 
 ##SwissProt
