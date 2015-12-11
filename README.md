@@ -396,7 +396,7 @@ $ProgDir/sub_interproscan.sh $Genes
 done 
 ```
 
-Append interpro scan (join all of the output files together into one single text document)
+###Append interpro scan (join all of the output files together into one single text document)
 ```bash
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/feature_annotation/interproscan
 for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
@@ -627,29 +627,32 @@ done
 done
 ```
 
-###STLILL NEED TO DO THIS!
+###Append Signal peptide prediction output
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-for SplitDir in $(ls -d gene_pred/augustus_preds/augustus/S.*); do
-Strain=$(echo $SplitDir | rev | cut -d '/' -f3 | rev)
-Organism=$(echo $SplitDir | rev |cut -d '/' -f4 | rev)
+for SplitDir in $(ls -d gene_pred/augustus_split/S.*/*); do
+Strain=$(echo $SplitDir | rev | cut -d '/' -f1 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+echo $Strain
+echo $Organism
 InStringAA=''
 InStringNeg=''
 InStringTab=''
 InStringTxt=''
-SigpDir=augustus_signalP-4.1
+SigpDir=augustus_signalp-4.1
 for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-	InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
-	InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
-	InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
-	InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+	InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_"$GRP"_sp.aa";  
+	InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_"$GRP"_sp_neg.aa";  
+	InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_"$GRP"_sp.tab";
+	InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_"$GRP"_sp.txt";  
 done
-cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
-cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
-cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
-done 
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/split/"$Strain"_aug_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/split/"$Strain"_aug_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/split/"$Strain"_aug_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/split/"$Strain"_aug_sp.txt
+done
+
 ```
 #Orthology analysis
 Analysis of orthologs between species was carried out using orthomcl.
