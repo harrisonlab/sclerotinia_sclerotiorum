@@ -1,5 +1,5 @@
 # Sclerotinia_sclerotiorum
-Commands used fr the analysis of Sclerotinia spp. genomes
+Commands used for the analysis of Sclerotinia spp. genomes
 
 Sclerotinia sclerotiorum
 ====================
@@ -210,6 +210,7 @@ A range of hash lengths were used and the best assembly selected for subsequent 
     qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
   done
 ```
+##NB: Not worked for P7 try assembling it again on it's own.
 
 ##Re-run assembly for Sclerotinia sclerotiorum P7
 ```bash
@@ -348,6 +349,9 @@ cat $Genes |grep '>' |wc -l;
 done
 ```
 
+##NB: Output named single stranded but is actually ran double stranded (see false in qsub). 
+This is just an error in the script naming.
+
 ** Number of genes predicted:
 
 ```bash
@@ -377,6 +381,11 @@ done
  
  ##Interproscan
 Interproscan was used to give gene models functional annotations.
+No qsub to run interpro scan, so run in screen. 
+NB: screen -a --> opens new session
+	ctrl+a+d --> closes session screen
+	screen -r --> returns running screens
+	ctrl+d --> kills screen completely
 
 To run using my interproscan
 ```bash
