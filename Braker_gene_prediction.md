@@ -1,10 +1,10 @@
 #Gene prediction using Braker
 
-##Gene prediction is trained using RNA-Seq data 
+#RNA-Seq data
 
+Gene prediction is trained using RNA-Seq data 
 
-
-##Downloading data 
+##Getting data onto the server
 ### From ncbi
 Data used for this test analysis SRA code: SRR1915981 was downloaded using fastq-dump
 
@@ -27,3 +27,21 @@ chmod ug+w  WTCHG_*.fastq.gz
 ```bash
 scp WTCHG_*.fastq.gz ransoe@149.155.34.72:/home/groups/harrisonlab/project_files/Sclerotinia_spp/RNA_Seq/Rep_3
 ```
+
+##Unzip files using gunzip
+```bash
+gunzip WTCHG_*.fastq.gz
+```
+
+##Concatenate the technical replicates
+```bash
+cat *_
+```
+
+##QC data
+
+##Trim data
+
+##Align data
+
+#Run BRAKER
