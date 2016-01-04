@@ -56,6 +56,7 @@ done
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
 This was done with fastq-mcf.
 
+```bash
 for RNASeqdata in $(ls -d RNA_Seq/*/*); do
 echo $RNASeqdata;
 ILLUMINA_ADAPTERS=/home/ransoe/git_repos/tools/seq_tools/ncbi_adapters.fa
@@ -74,21 +75,24 @@ echo $F_OUT
 echo $R_OUT
 qsub $ProgDir/rna_qc_fastq-mcf_RNA.sh $Read_F $Read_R $IluminaAdapters RNA
 done
+```
 
 ###Try running on each pair as so. 
+```bash
 fastq-mcf $ILLUMINA_ADAPTERS WTCHG_143994_02_1.fastq WTCHG_143994_02_2.fastq -o WTCHG_143994_02_1_trim.fq -o WTCHG_143994_02_2_trim.fq -C 1000000 -u -k 20 -t 0.01 -q 30 -p 5
 qsub $ProgDir/run_fastqc.sh WTCHG_143994_02_1_trim.fq;
+```
 
-###Sort of works but still not needed
+###Sort of works but still not needed so going to continue with un-trimmed data
 
 
 ##Align data
 Align reads to published genome using tophat. As the reads are for both Sclerotinia and lettuce align to Sclerotinia 1980 genome.
+#Test run with Rep_1, tech_1
 
+```bash
 Sclerotiniagenome=/home/groups/harrisonlab/project_files/Sclerotinia_spp/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/RNAseq
-
-#Test run with Rep_1, tech_1
 	
 for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
 	echo $Filepath
@@ -103,6 +107,7 @@ for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
 	OutDir=alignment/$Rep/$Tech
 	qsub $ProgDir/tophat_alignment_edit.sh $Sclerotiniagenome $FileF $FileR $OutDir
 done
+```
 
 #Run BRAKER
 screen -a set variables
