@@ -39,25 +39,70 @@ cat *_
 ```
 
 ##QC data
-FileF=raw_rna/genbank/P.cactorum/10300/SRR1206032.fastq
-  FileR=raw_rna/genbank/P.cactorum/10300/SRR1206033.fastq
-  IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
-  qsub /home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+```bash
+for RNASeqdata in $(ls RNA_Seq/Rep_*/tech_*/*.fastq); do
+echo $RNASeqdata;
+ProgDir=~/git_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh $RNASeqdata;
+done
 
+```
+###Data doesn't appear to need trimming due to good quality and no adapters. Will however try trimming just to see.
 
-##Trim data
+##Data trimming
+
+###This bit of code doesn't work
+
+Trimming was performed on data to trim adapters from sequences and remove poor quality data.
+This was done with fastq-mcf.
+
+for RNASeqdata in $(ls -d RNA_Seq/*/*); do
+echo $RNASeqdata;
+ILLUMINA_ADAPTERS=/home/ransoe/git_repos/tools/seq_tools/ncbi_adapters.fa
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/rna_qc
+FileF=$(ls $RNASeqdata/*_*.fastq | grep '1.fastq')
+FileR=$(ls $RNASeqdata/*_*.fastq | grep '2.fastq')
+echo $FileF
+echo $FileR
+F_FILE=$(echo $FileF | rev | cut -d "/" -f1 | rev | sed 's/.gz//')
+R_FILE=$(echo $FileR| rev | cut -d "/" -f1 | rev | sed 's/.gz//')
+echo $F_FILE
+echo $R_FILE
+F_OUT=$(echo "$F_FILE" | sed 's/.fq/_trim.fq/g' | sed 's/.fastq/_trim.fq/g')
+R_OUT=$(echo "$R_FILE" | sed 's/.fq/_trim.fq/g' | sed 's/.fastq/_trim.fq/g')
+echo $F_OUT
+echo $R_OUT
+qsub $ProgDir/rna_qc_fastq-mcf_RNA.sh $Read_F $Read_R $IluminaAdapters RNA
+done
+
+###Try running on each pair as so. 
+fastq-mcf $ILLUMINA_ADAPTERS WTCHG_143994_02_1.fastq WTCHG_143994_02_2.fastq -o WTCHG_143994_02_1_trim.fq -o WTCHG_143994_02_2_trim.fq -C 1000000 -u -k 20 -t 0.01 -q 30 -p 5
+qsub $ProgDir/run_fastqc.sh WTCHG_143994_02_1_trim.fq;
+
+###Sort of works but still not needed
+
 
 ##Align data
-Alignments of RNAseq reads were made against the 10300 Genome using tophat:
+Align reads to published genome using tophat. As the reads are for both Sclerotinia and lettuce align to Sclerotinia 1980 genome.
 
-2.1) Alignment
+Sclerotiniagenome=/home/groups/harrisonlab/project_files/Sclerotinia_spp/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/RNAseq
 
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
-Genome=assembly/abyss/P.cactorum/10300/10300_abyss_53/10300_abyss-scaffolds_500bp_renamed.fa
-FileF=qc_rna/raw_rna/genbank/P.cactorum/F/SRR1206032_trim.fq.gz
-FileR=qc_rna/raw_rna/genbank/P.cactorum/R/SRR1206033_trim.fq.gz
-OutDir=alignment/P.cactorum/10300
-qsub $ProgDir/tophat_alignment.sh $Genome $FileF $FileR $OutDir
+#Test run with Rep_1, tech_1
+	
+for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
+	echo $Filepath
+	Rep=$(echo $Filepath| rev | cut -d '/' -f2 | rev)
+	echo $Rep
+	Tech=$(echo $Filepath | rev | cut -d '/' -f1 | rev)
+	echo $Tech
+	FileF=$(ls $Filepath/*_1.fastq)
+	FileR=$(ls $Filepath/*_2.fastq)
+	echo $FileF
+	echo $FileR
+	OutDir=alignment/$Rep/$Tech
+	qsub $ProgDir/tophat_alignment_edit.sh $Sclerotiniagenome $FileF $FileR $OutDir
+done
 
 #Run BRAKER
 screen -a set variables
