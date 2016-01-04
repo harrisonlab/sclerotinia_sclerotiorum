@@ -91,7 +91,7 @@ Align reads to published genome using tophat. As the reads are for both Scleroti
 #Test run with Rep_1, tech_1
 
 ```bash
-Sclerotiniagenome=/home/groups/harrisonlab/project_files/Sclerotinia_spp/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
+Sclerotiniagenome=/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/RNAseq
 	
 for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
