@@ -98,15 +98,33 @@ bamtools merge -in accepted_hits_tech1.bam -in accepted_hits_tech2.bam -out Rep1
 
 
 #Run BRAKER
+
+Copy the licence key across.
 ```bash
 cp /home/armita/.gm_key ~/.gm_key
 ```
+
+Run BRAKER which includes AUGUSTUS
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-Assembly=Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
-OutDir=gene_pred/braker/Sclerotinia_1980
+Smin=/assembly/spades/S.minor/S5/filtered_contigs/contigs_min_500bp_renamed.fasta 
+
+for Genome in $(ls $Smin); do
+Strain=$(echo $Genome| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Genome | rev | cut -d '/' -f4 | rev)
+OutDir=gene_pred/braker/$Organism/$Strain
 AcceptedHits=alignment/Rep_1/Rep1_accepted_hits.bam
-GeneModelName=Sclerotinia1980_braker
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+GeneModelName="$Organism"_"$Strain"_braker
+qsub $ProgDir/sub_braker_fungi.sh $Genome $OutDir $AcceptedHits $GeneModelName
+done
 ```
 
+#Extract gff and amino acid sequences
+```bash
+File= gene_pred/braker/Sclerotinia_1980/Sclerotinia1980_braker/augustus.gff 
+getAnnoFasta.pl $File
+OutDir=$(dirname $File)
+echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+done
+```
