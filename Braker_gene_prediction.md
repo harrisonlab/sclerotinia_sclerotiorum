@@ -90,16 +90,14 @@ done
 ```
 
 ##Merge the bam files from technical reps together
+First re-name and put into the same folder
 e.g. Rep_1, tech_1 and tech_2 concatenated. 
 ```bash
-tech1=Rep_1/tech_1/accepted_hits.bam
-tech2=Rep_1/tech_2/accepted_hits.bam
 bamtools merge -in accepted_hits_tech1.bam -in accepted_hits_tech2.bam -out Rep1_accepted_hits.bam
 ```
 
 
 #Run BRAKER
-
 ```bash
 cp /home/armita/.gm_key ~/.gm_key
 ```
