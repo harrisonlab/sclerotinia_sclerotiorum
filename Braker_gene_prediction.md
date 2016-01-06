@@ -105,7 +105,7 @@ cp /home/armita/.gm_key ~/.gm_key
 ```
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-Assembly=/Genomes/Sclerotinia.Ssclerotiorum_v2.fasta
+Assembly=Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
 OutDir=gene_pred/braker/Sclerotinia_1980
 AcceptedHits=alignment/Rep_1/Rep1_accepted_hits.bam
 GeneModelName=Sclerotinia1980_braker
