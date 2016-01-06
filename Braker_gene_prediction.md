@@ -96,7 +96,6 @@ e.g. Rep_1, tech_1 and tech_2 concatenated.
 bamtools merge -in accepted_hits_tech1.bam -in accepted_hits_tech2.bam -out Rep1_accepted_hits.bam
 ```
 
-
 #Run BRAKER
 
 Copy the licence key across.
@@ -108,8 +107,11 @@ Run BRAKER which includes AUGUSTUS
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
 Smin=/assembly/spades/S.minor/S5/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Smin=/assembly/spades/S.sclerotiorum/DG4/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Smin=/assembly/spades/S.minor/HE1/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Smin=/assembly/spades/S.minor/R316/filtered_contigs/contigs_min_500bp_renamed.fasta 
 
-for Genome in $(ls $Smin); do
+for Genome in $Smin $Scl $Ssub $Stri do
 Strain=$(echo $Genome| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Genome | rev | cut -d '/' -f4 | rev)
 OutDir=gene_pred/braker/$Organism/$Strain
