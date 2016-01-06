@@ -46,8 +46,6 @@ done
 
 ##Data trimming
 
-###This bit of code doesn't work
-
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
 This was done with fastq-mcf on each pair using the script trimming.sh as below.
 
@@ -102,13 +100,15 @@ bamtools merge -in accepted_hits_tech1.bam -in accepted_hits_tech2.bam -out Rep1
 
 #Run BRAKER
 
+```bash
 cp /home/armita/.gm_key ~/.gm_key
-
+```
+```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
 Assembly=/Genomes/Sclerotinia.Ssclerotiorum_v2.fasta
 OutDir=gene_pred/braker/Sclerotinia_1980
 AcceptedHits=alignment/Rep_1/Rep1_accepted_hits.bam
 GeneModelName=Sclerotinia1980_braker
 qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
-
+```
 
