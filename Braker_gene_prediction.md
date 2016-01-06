@@ -107,12 +107,12 @@ cp /home/armita/.gm_key ~/.gm_key
 Run BRAKER which includes AUGUSTUS
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
-Smin=/assembly/spades/S.minor/S5/filtered_contigs/contigs_min_500bp_renamed.fasta 
-Smin=/assembly/spades/S.sclerotiorum/DG4/filtered_contigs/contigs_min_500bp_renamed.fasta 
-Smin=/assembly/spades/S.minor/HE1/filtered_contigs/contigs_min_500bp_renamed.fasta 
-Smin=/assembly/spades/S.minor/R316/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Smin=assembly/spades/S.minor/S5/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Sscl=assembly/spades/S.sclerotiorum/DG4/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Ssub=assembly/spades/S.subartica/HE1/filtered_contigs/contigs_min_500bp_renamed.fasta 
+Stri=assembly/spades/S.trifoliorum/R316/filtered_contigs/contigs_min_500bp_renamed.fasta 
 
-for Genome in $Smin $Scl $Ssub $Stri do
+for Genome in $Smin $Scl $Ssub $Stri; do
 Strain=$(echo $Genome| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Genome | rev | cut -d '/' -f4 | rev)
 OutDir=gene_pred/braker/$Organism/$Strain
