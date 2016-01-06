@@ -69,6 +69,7 @@ NB: Test to see if trimmed data affects the alignment. If so this may need re-ru
 
 ##Align data
 Align reads to published genome using tophat. As the reads are for both Sclerotinia and lettuce align to Sclerotinia 1980 genome.
+Did each alignment individually changing the Rep and tech number manually.
 
 ```bash
 Sclerotiniagenome=/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
