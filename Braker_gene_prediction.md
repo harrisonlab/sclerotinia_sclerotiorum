@@ -33,11 +33,6 @@ scp WTCHG_*.fastq.gz ransoe@149.155.34.72:/home/groups/harrisonlab/project_files
 gunzip WTCHG_*.fastq.gz
 ```
 
-##Concatenate the technical replicates
-```bash
-cat *_
-```
-
 ##QC data
 ```bash
 for RNASeqdata in $(ls RNA_Seq/Rep_*/tech_*/*.fastq); do
@@ -54,54 +49,41 @@ done
 ###This bit of code doesn't work
 
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
-This was done with fastq-mcf.
+This was done with fastq-mcf on each pair using the script trimming.sh as below.
+
+qsub trimming.sh fastqForwards fastqReverse OutputForwards OutputReverse
+
+An example below.
 
 ```bash
-for RNASeqdata in $(ls -d RNA_Seq/*/*); do
-echo $RNASeqdata;
-ILLUMINA_ADAPTERS=/home/ransoe/git_repos/tools/seq_tools/ncbi_adapters.fa
-ProgDir=/home/ransoe/git_repos/tools/seq_tools/rna_qc
-FileF=$(ls $RNASeqdata/*_*.fastq | grep '1.fastq')
-FileR=$(ls $RNASeqdata/*_*.fastq | grep '2.fastq')
-echo $FileF
-echo $FileR
-F_FILE=$(echo $FileF | rev | cut -d "/" -f1 | rev | sed 's/.gz//')
-R_FILE=$(echo $FileR| rev | cut -d "/" -f1 | rev | sed 's/.gz//')
-echo $F_FILE
-echo $R_FILE
-F_OUT=$(echo "$F_FILE" | sed 's/.fq/_trim.fq/g' | sed 's/.fastq/_trim.fq/g')
-R_OUT=$(echo "$R_FILE" | sed 's/.fq/_trim.fq/g' | sed 's/.fastq/_trim.fq/g')
-echo $F_OUT
-echo $R_OUT
-qsub $ProgDir/rna_qc_fastq-mcf_RNA.sh $Read_F $Read_R $IluminaAdapters RNA
-done
+qsub trimming.sh WTCHG_144185_02_1.fastq WTCHG_144185_02_2.fastq WTCHG_144185_02_1_trim.fq WTCHG_144185_02_2_trim.fq
 ```
 
-###Try running on each pair as so. 
+###Quality check after trimmingq. 
 ```bash
-fastq-mcf $ILLUMINA_ADAPTERS WTCHG_143994_02_1.fastq WTCHG_143994_02_2.fastq -o WTCHG_143994_02_1_trim.fq -o WTCHG_143994_02_2_trim.fq -C 1000000 -u -k 20 -t 0.01 -q 30 -p 5
-qsub $ProgDir/run_fastqc.sh WTCHG_143994_02_1_trim.fq;
+ProgDir=~/git_repos/tools/seq_tools/dna_qc;
+qsub $ProgDir/run_fastqc.sh RNA_Seq/Rep_1/tech_2/WTCHG_144185_02_1_trim.fq;
 ```
 
-###Sort of works but still not needed so going to continue with un-trimmed data
+###Continued with un-trimmed data
+NB: Test to see if trimmed data affects the alignment. If so this may need re-running.
 
 
 ##Align data
 Align reads to published genome using tophat. As the reads are for both Sclerotinia and lettuce align to Sclerotinia 1980 genome.
-#Test run with Rep_1, tech_1
 
 ```bash
 Sclerotiniagenome=/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/RNAseq
 	
-for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
+for Filepath in $(ls -d RNA_Seq/Rep_1/tech_2); do
 	echo $Filepath
 	Rep=$(echo $Filepath| rev | cut -d '/' -f2 | rev)
 	echo $Rep
 	Tech=$(echo $Filepath | rev | cut -d '/' -f1 | rev)
 	echo $Tech
-	FileF=$(ls $Filepath/*_1.fastq)
-	FileR=$(ls $Filepath/*_2.fastq)
+	FileF=$(ls $Filepath/*_1.fq)
+	FileR=$(ls $Filepath/*_2.fq)
 	echo $FileF
 	echo $FileR
 	OutDir=alignment/$Rep/$Tech
@@ -109,26 +91,24 @@ for Filepath in $(ls -d RNA_Seq/Rep_1/tech_1); do
 done
 ```
 
+##Merge the bam files from technical reps together
+e.g. Rep_1, tech_1 and tech_2 concatenated. 
+```bash
+tech1=Rep_1/tech_1/accepted_hits.bam
+tech2=Rep_1/tech_2/accepted_hits.bam
+bamtools merge -in accepted_hits_tech1.bam -in accepted_hits_tech2.bam -out Rep1_accepted_hits.bam
+```
+
+
 #Run BRAKER
-screen -a set variables
 
-  qlogin
-  WorkDir=/tmp/braker
-  ProjDir=/home/groups/harrisonlab/project_files/idris
-  Assembly=$ProjDir/assembly/abyss/P.cactorum/10300/10300_abyss_53/10300_abyss-scaffolds_500bp_renamed.fa
-  OutDir=$ProjDir/gene_pred/braker/P.cactorum/10300
-move to working directory
+cp /home/armita/.gm_key ~/.gm_key
 
-  mkdir -p $WorkDir
-  cd $WorkDir
-  braker.pl \
-    --cores 16 \
-    --genome=$Assembly \
-    --GENEMARK_PATH=/home/armita/prog/genemark/gm_et_linux_64/gmes_petap \
-    --BAMTOOLS_PATH=/home/armita/prog/bamtools/bamtools/bin \
-    --species=P.cactorum \
-    --bam=$ProjDir/alignment/P.cactorum/10300/accepted_hits.bam
-  mkdir -p $OutDir
-  cp -r braker/* $OutDir/.
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+Assembly=/Genomes/Sclerotinia.Ssclerotiorum_v2.fasta
+OutDir=gene_pred/braker/Sclerotinia_1980
+AcceptedHits=alignment/Rep_1/Rep1_accepted_hits.bam
+GeneModelName=Sclerotinia1980_braker
+qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 
-  rm -r $WorkDir
+
