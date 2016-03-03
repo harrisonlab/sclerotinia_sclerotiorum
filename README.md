@@ -212,11 +212,11 @@ A range of hash lengths were used and the best assembly selected for subsequent 
 ```
 ##NB: Not worked for P7 try assembling it again on it's own.
 
-##Re-run assembly for Sclerotinia sclerotiorum P7
+##Re-run assembly for Sclerotinia sclerotiorum P7 with higher memory
 ```bash
- for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
+for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
   echo $StrainPath
-	ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
+    ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/spades/multiple_libraries
     Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
     Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
     echo $Strain
@@ -233,12 +233,12 @@ A range of hash lengths were used and the best assembly selected for subsequent 
     echo $TrimR2_Read
     echo $TrimF3_Read
     echo $TrimR3_Read
-    OutDir=assembly/spades/$Organism/$Strain
-    qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
+    OutDir=assembly/spades/HiMem/$Organism/$Strain
+    qsub $ProgDir/subSpades_3lib_HiMem.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
   done 
   ```
 
-###NB: 10/12/15: This hasn't worked, go back and assemble this again. Continue from this point with other 4 assemblies. 
+###This has worked continue with P7 separately. Additional HiMem folder. 
 
   
 Assemblies were summarised to allow the best assembly to be determined by eye.
@@ -269,6 +269,21 @@ echo $OutDir
     rm editfile.tab
 done
 ```
+###P7 renaming  
+
+```bash
+for OutDir in $(ls -d assembly/spades/HiMem/S.*/*/filtered_contigs); do
+echo $OutDir
+    ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+    AssFiltered=$OutDir/contigs_min_500bp.fasta
+    AssRenamed=$OutDir/contigs_min_500bp_renamed.fasta
+    echo $AssFiltered
+    echo $AssRenamed
+    printf '.\t.\t.\t.\n' > editfile.tab
+    $ProgDir/remove_contaminants.py --inp $AssFiltered --out $AssRenamed --coord_file editfile.tab
+    rm editfile.tab
+done
+```
 
 ##Quast to summarise statistics
 
@@ -286,6 +301,19 @@ done
 See report.txt output. 
 ```
 
+##P7 Quast
+```bash
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/HiMem/S.*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo $Strain
+    echo $Organism
+    OutDir=assembly/spades/HiMem/$Organism/$Strain/filtered_contigs
+    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
 # Repeat masking
 Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
 
@@ -299,6 +327,16 @@ for BestAss in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta);
     qsub $ProgDir/transposonPSI.sh $BestAss
 done
  ```
+##P7 masking
+
+```bash
+ProgDir=/home/ransoe/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/HiMem/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    echo $BestAss
+    qsub $ProgDir/rep_modeling.sh $BestAss
+    qsub $ProgDir/transposonPSI.sh $BestAss
+done
+```
 
 ** % bases masked by repeatmasker:
 
