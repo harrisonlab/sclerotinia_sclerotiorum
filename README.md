@@ -210,9 +210,9 @@ A range of hash lengths were used and the best assembly selected for subsequent 
     qsub $ProgDir/subSpades_3lib.sh $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir correct 10
   done
 ```
-##NB: Not worked for P7 try assembling it again on it's own.
+###NB: Not worked for P7 try assembling it again on it's own.
 
-##Re-run assembly for Sclerotinia sclerotiorum P7 with higher memory
+###Re-run assembly for Sclerotinia sclerotiorum P7 with higher memory
 ```bash
 for StrainPath in $(ls -d qc_dna/paired/S.sclerotiorum/P7); do
   echo $StrainPath
@@ -327,7 +327,7 @@ for BestAss in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta);
     qsub $ProgDir/transposonPSI.sh $BestAss
 done
  ```
-##P7 masking
+###P7 masking
 
 ```bash
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/repeat_masking
