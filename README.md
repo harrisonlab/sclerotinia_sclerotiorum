@@ -357,6 +357,16 @@ ProgDir=/home/ransoe/git_repos/tools/gene_prediction/cegma
     qsub $ProgDir/sub_cegma.sh $Assembly dna
     done
 ```
+
+###P7 CEGMA
+
+```bash
+for Assembly in $(ls assembly/spades/HiMem/S.*/*/filtered_contigs/*_500bp_renamed.fasta); do
+ProgDir=/home/ransoe/git_repos/tools/gene_prediction/cegma
+    qsub $ProgDir/sub_cegma.sh $Assembly dna
+    done
+```
+
 Results were viewed in completeness report, gff and fa. 
 
 ** Number of cegma genes present and complete:
