@@ -401,9 +401,18 @@ done
 
 
 ###P7 Augustus
+
 ```bash
-
-
+for Assembly in $(ls assembly/spades/HiMem/S.*/*/filtered_contigs/*_500bp_renamed.fasta); do
+    Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo $Strain
+    echo $Organism
+    OutDir=gene_pred/augustus/$Organism/$Strain
+    ProgDir=/home/ransoe/git_repos/tools/gene_prediction/augustus
+    GeneModel=botrytis_cinerea
+    qsub $ProgDir/submit_augustus.sh $GeneModel $Assembly false $OutDir
+done
 ```
 
 ####NB: Output named single stranded but is actually ran double stranded (see false in qsub). 
