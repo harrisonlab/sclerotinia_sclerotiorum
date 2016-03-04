@@ -378,6 +378,7 @@ Results were viewed in completeness report, gff and fa.
 Gene prediction was performed for the neonectria genome.
 CEGMA genes were used as Hints for the location of CDS.
 
+##CEGMA
 ```bash
 for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
  	Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
@@ -390,23 +391,29 @@ for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta)
     qsub $ProgDir/submit_augustus.sh $GeneModel $Assembly false $OutDir
 done
 ```
-Count the number of genes in each gene prediction output
+###Count the number of genes in each gene prediction output
 ```bash
 for Genes in $(ls gene_pred/augustus/S.*/*/*_EMR_singlestrand_aug_out.aa); do
 cat $Genes |grep '>' |wc -l; 
 done
 ```
-
-##NB: Output named single stranded but is actually ran double stranded (see false in qsub). 
-This is just an error in the script naming.
-
 ** Number of genes predicted:
 
-```bash
-##Gene prediction part 2- Gene model predictions using ORFs
 
+###P7 Augustus
+```bash
+
+
+```
+
+####NB: Output named single stranded but is actually ran double stranded (see false in qsub). 
+####This is just an error in the script naming.
+
+
+##Gene prediction part 2- Gene model predictions using ORFs
 Open reading frame predictions were made using the run_ORF_finder.sh.
 
+```bash
 ProgDir=/home/ransoe/git_repos/tools/gene_prediction/ORF_finder
 for Genome in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
     qsub $ProgDir/run_ORF_finder.sh $Genome
