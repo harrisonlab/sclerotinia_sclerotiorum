@@ -1,7 +1,6 @@
 # Sclerotinia_sclerotiorum
 Commands used for the analysis of Sclerotinia spp. genomes
 
-Sclerotinia sclerotiorum
 ====================
 
 
@@ -423,7 +422,7 @@ done
 ```
 
 ```bash
-No. of genes predicted form Augustus:
+No. of genes predicted from Augustus:
 
 S.sclerotiorum P7: 12083
 S.minor S5: 11582
