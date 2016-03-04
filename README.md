@@ -1,5 +1,13 @@
-# Sclerotinia_sclerotiorum
+# Sclerotinia_species
 Commands used for the analysis of Sclerotinia spp. genomes
+Genomes assembled are:
+```bash
+Sclerotinia sclerotiorum P7
+Sclerotinia sclerotiorum DG4
+Sclerotinia minor S5
+Sclerotinia subartica HE1
+Sclerotinia trifoliorum R316
+```
 
 ====================
 
