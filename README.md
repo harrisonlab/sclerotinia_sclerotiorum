@@ -301,7 +301,7 @@ done
 See report.txt output. 
 ```
 
-##P7 Quast
+###P7 Quast
 ```bash
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
 for Assembly in $(ls assembly/spades/HiMem/S.*/*/filtered_contigs/*_500bp_renamed.fasta); do
