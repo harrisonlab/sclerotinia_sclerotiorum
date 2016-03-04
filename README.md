@@ -351,6 +351,7 @@ Gene models were used to predict genes in the Neonectria genome. This used resul
 ## Pre-gene prediction
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 
+##CEGMA
 ```bash
 for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
 ProgDir=/home/ransoe/git_repos/tools/gene_prediction/cegma
@@ -378,7 +379,6 @@ Results were viewed in completeness report, gff and fa.
 Gene prediction was performed for the neonectria genome.
 CEGMA genes were used as Hints for the location of CDS.
 
-##CEGMA
 ```bash
 for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
  	Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
