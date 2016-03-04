@@ -415,6 +415,23 @@ for Assembly in $(ls assembly/spades/HiMem/S.*/*/filtered_contigs/*_500bp_rename
 done
 ```
 
+Count the number of genes:
+```bash
+for Genes in $(ls gene_pred/augustus/S.sclerotiorum/P7/*_EMR_singlestrand_aug_out.aa); do
+cat $Genes |grep '>' |wc -l; 
+done
+```
+
+```bash
+No. of genes predicted form Augustus:
+
+S.sclerotiorum P7: 12083
+S.minor S5: 11582
+S.sclerotiorum DG4: 12039
+S.subartica HE1: 15118
+S.trifoliorum R316: 11847
+```
+
 ####NB: Output named single stranded but is actually ran double stranded (see false in qsub). 
 ####This is just an error in the script naming.
 
