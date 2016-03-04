@@ -1,5 +1,6 @@
-# Sclerotinia_species
-Commands used for the analysis of Sclerotinia spp. genomes
+# Sclerotinia_species assemblies:
+Commands used for the analysis of Sclerotinia spp. genomes.
+
 Genomes assembled are:
 ```bash
 Sclerotinia sclerotiorum P7
