@@ -100,7 +100,7 @@ qsub $ProgDir/run_fastqc.sh $RNASeqdata;
 done
 ```
 
-##Align to published genome
+#Align to published genome
 ```bash
 Sclerotiniagenome=/Genomes/Sclerotinia/Ssclerotiorum_v2.fasta
 ProgDir=/home/ransoe/git_repos/tools/seq_tools/RNAseq
@@ -121,7 +121,7 @@ for Filepath in $(ls -d RNA_Seq/Timepoint_3*/Rep_*); do
 done
 ```
 
-#Pull out aligned.bam file then sort, turn back into fastq and put reads back to F/R
+##Pull out aligned.bam file then sort, turn back into fastq and put reads back to F/R
 
 ```bash
 samtools sort -n accepted_hits.bam accepted_hits_sorted
@@ -131,7 +131,7 @@ grep '@HISEQ.*/1' -A 3 accepted_hits_sorted.fastq --no-group-separator >accepted
 grep '@HISEQ.*/2' -A 3 accepted_hits_sorted.fastq --no-group-separator >accepted_hits_read_2.fastq
 ```
 
-##Align against own assembled genomes
+#Align against own assembled genomes
 ##Align against S.min
 
 ```bash
@@ -243,7 +243,7 @@ done
 ```
 ####NB. S.sclerotiorum spelt wrong
 
-##Merge bam files
+#Merge bam files
 
 ```bash
 cp accepted_hits.bam ../accepted_hits_T33Rep1.bam
