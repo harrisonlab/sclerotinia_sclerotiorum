@@ -283,7 +283,7 @@ qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
-#Braker for S.sclerotiorum P7 only
+##Braker for S.sclerotiorum P7 only
 
 ```bash
 for Assembly in $(ls assembly/spades/HiMem/*/*/filtered_contigs/contigs_min_500bp_renamed.fasta);do
