@@ -1,5 +1,9 @@
-##Blasting to find 28S,18S,ITS,RPB2,HSP60,G3PDH and B-tubulin in S.subartica
-###Files in analysis/blast_homology
+##Blasting to find regions of interest
+###28S,18S,ITS,RPB2,HSP60,G3PDH and B-tubulin 
+###Files stored in analysis/blast_homology
+
+
+###Only interested in S.subartica but worth running through with all genomes for future reference
 
 ```bash
 mkdir -p Sylvain_sequences
