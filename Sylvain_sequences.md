@@ -91,6 +91,7 @@ done
 
 ##Turn into a gff file only the top 3 hits
 
+```bash
 ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
 for blast in B_tubulin_blast HSP60_blast RPB2_blast G3PDH_blast Ref_Seq_18S; do
 echo $blast
@@ -105,7 +106,24 @@ NumHits=5
 $ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
 done
 done
+```
 
+```bash
+ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+for blast in Ref_Seq_28S Ref_Seq_ITS; do
+echo $blast
+for BlastHits in $(ls analysis/blast_homology/Sylvain_sequences_output/S.*/*/*_$blast.fa_hits.csv); do
+Strain=$(echo $BlastHits | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $BlastHits | rev | cut -d '/' -f3 | rev)
+echo $Strain
+echo $Organism
+HitsGff=analysis/blast_homology/Sylvain_sequences_output/$Organism/$Strain/"$Strain"_$blast.fa_hits.gff
+Column2=Blast_homolog
+NumHits=5
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+done
+done
+```
 
 ##Running against predicted genes (CDS) using Sylvain_blast_genemodel.sh script
 
@@ -180,5 +198,19 @@ qsub $ProgDir/Sylvain_blast_genemodel.sh $Query dna $Assembly
 done
 ```
 
-
-
+```bash
+ProgDir=/home/ransoe/git_repos/tools/pathogen/blast
+for blast in B_tubulin_blast HSP60_blast RPB2_blast G3PDH_blast Ref_Seq_18S Ref_Seq_28S Ref_Seq_ITS; do
+echo $blast
+for BlastHits in $(ls analysis/blast_homology/Sylvain_sequences_output/S.*/*/*_EMR_singlestrand_aug_out.codingseq_*_$blast.fa_hits.csv); do
+Strain=$(echo $BlastHits | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $BlastHits | rev | cut -d '/' -f3 | rev)
+echo $Strain
+echo $Organism
+HitsGff=analysis/blast_homology/Sylvain_sequences_output/$Organism/$Strain/CodingSequence_"$Strain"_$blast.fa_hits.gff
+Column2=Blast_homolog
+NumHits=5
+$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+done
+done
+```
