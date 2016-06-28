@@ -52,9 +52,6 @@ qsub $ProgDir/run_bwa.sh $FASTA $TrimF3_Read $TrimR3_Read Run3.sam
 done
 ```
 
-###Need to merge here!
-
-
 ##Sam tools bwa sam —> bam 
 ###Sort and index for viewing in IGV
 
@@ -62,4 +59,18 @@ done
 samtools view -bS Run1.sam > Run1.bam
 samtools sort Run1.bam Run1_sorted
 samtools index Run1_sorted.bam 
+
+samtools view -bS Run2.sam > Run2.bam
+samtools sort Run2.bam Run2_sorted
+samtools index Run2_sorted.bam 
+
+samtools view -bS Run3.sam > Run3.bam
+samtools sort Run3.bam Run3_sorted
+samtools index Run3_sorted.bam 
+
+
+samtools mpileup -uf Ssclerotiorum_v2_sorted.fasta Run1_sorted.bam Run2_sorted.bam Run3_sorted.bam | bcftools view -cgb - > allruns.raw.bcf
+
+bcftools view allruns.raw.bcf | /home/armita/all_idris/idris/prog/samtools-0.1.18/bcftools/vcfutils.pl vcf2fq -d10 -D500 > sorted.mpileup.filtered_d10_D500.fq
+
 ```
