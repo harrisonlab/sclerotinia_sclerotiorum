@@ -56,7 +56,10 @@ done
 
 
 ##Sam tools bwa sam —> bam 
+###Sort and index for viewing in IGV
 
+```bash
 samtools view -bS Run1.sam > Run1.bam
 samtools sort Run1.bam Run1_sorted
 samtools index Run1_sorted.bam 
+```
