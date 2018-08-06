@@ -9,8 +9,7 @@ for RawData in raw_rna/S.sclerotiorum/*/*.fastq.gz; do
 	qsub $ProgDir/run_fastqc.sh $RawData
 done
 ```
-###Trimming was performed on data to trim adapters from sequences and remove poor quality data.
-###This was done with fastq-mcf
+###Trimming was performed on data to trim adapters from sequences and remove poor quality data.This was done with fastq-mcf
 
 ```bash
 for StrainPath in raw_rna/S.sclerotiorum/; do
@@ -38,7 +37,9 @@ for StrainPath in raw_rna/S.sclerotiorum/; do
 
 #STAR alignment
 ##Edited Andy's star_sub.sh script to take previously made STAR index transferred from the York server
+
 ##New index stored in JointGenome/old_index/Index
+
 ##Copies of the fasta and gtf files used to create the jointgenome index are in JointGenome folder too.
 
 ```bash
@@ -51,6 +52,7 @@ Index=JointGenome/old_index/index
 qsub $ProgDir/star_sub_edit.sh $FileF $FileR $OutDir $Index
 ```
 ###This produced files in /home/groups/harrisonlab/project_files/Sclerotinia_spp
+
 ###These were copied to alignment
 
 #Bam file processing
@@ -137,7 +139,53 @@ Dovetail_09Sept_Map_inspected_12-07-2015_1_v8_lg_7	195685357	0	0
 Dovetail_09Sept_Map_inspected_12-07-2015_1_v8_lg_8	309698552	0	0
 Dovetail_09Sept_Map_inspected_12-07-2015_1_v8_lg_9	204289203	0	0
 ```
-
 ###Nothing aligned to lettuce genome in this bam file which is good. Not sure why the stats still show the lettuce chromosomes.
+
+#Take bam file, back to fastq then re-run against my genomes?
+#Script in alignment/star/S.sclerotiorum folder with $1 bam file $2 output1.fq $3 output2.fq
+```bash
+qsub bamtofastq.sh sclerotinia.bam sclerotinia_1.fq sclerotinia_2.fq
+```
+#Copied genome files and fastq files to each of the MinION folders in alignment
+
+##Made indexes from within the folder with specific star_index.sh script in each
+##Not the most elegant method but it works
+
+###S.sclerotiorum P7
+```bash
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.sclerotiorum/P7/S_scl_min_500bp_renamed_mtfree.fasta /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.sclerotiorum
+
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.sclerotiorum
+```
+```bash
+qsub star_index.sh S_scl_min_500bp_renamed_mtfree.fasta sclerotinia_1.fq sclerotinia_2.fq
+```
+
+##S.minor S5
+```bash
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.minor/P7/S_minor_min_500bp_renamed.fasta /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.sclerotiorum
+
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.minor
+```
+```bash
+qsub star_index.sh S_minor_min_500bp_renamed.fasta sclerotinia_1.fq sclerotinia_2.fq
+```
+
+##S.subarctica HE1
+```bash
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.subarctica/HE1/S_sub_min_500bp_renamed.fasta /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.subarctica
+
+cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.subarctica
+```
+```bash
+qsub star_index.sh S_sub_min_500bp_renamed.fasta sclerotinia_1.fq sclerotinia_2.fq
+```
+
+#Running star using star_running.sh script in each folder
+```bash
+qsub star_running.sh sclerotinia_1.fq sclerotinia_2.fq aligned/ index
+```
+
+#Pre-gene prediction (cegma)
 
 #Braker
