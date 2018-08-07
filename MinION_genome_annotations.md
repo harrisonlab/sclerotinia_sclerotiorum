@@ -194,5 +194,43 @@ qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned/ index
 ```
 
 # Pre-gene prediction (cegma)
+```bash
+```
 
+# Gene prediction
+
+# Gene training
 # Braker
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
+echo $Assembly
+Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/braker/MinION_genomes/$Organism/"$Strain"_braker
+AcceptedHits=$(ls alignment/star/MinION_genomes/$Organism/star_aligmentAligned.sortedByCoord.out.bam)
+GeneModelName="$Organism"_"$Strain"_braker
+rm -r /home/armita/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
+qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+done
+```
+# Coding quary
+### Additional genes were added to Braker gene predictions, using CodingQuary in pathogen mode to predict additional regions.
+
+### Firstly, aligned RNAseq data was assembled into transcripts using Cufflinks.
+
+### Note - cufflinks doesn't always predict direction of a transcript and therefore features can not be restricted by strand when they are intersected.
+
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
+Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/cufflinks/$Organism/$Strain/
+mkdir -p $OutDir
+AcceptedHits=$(ls alignment/star/MinION_genomes/$Organism/star_aligmentAligned.sortedByCoord.out.bam)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+done
+```
