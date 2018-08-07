@@ -157,6 +157,7 @@ cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.scle
 
 cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.sclerotiorum
 ```
+### Make index
 ```bash
 qsub star_index.sh S_scl_min_500bp_renamed_mtfree.fasta sclerotinia_1.fq sclerotinia_2.fq
 ```
@@ -167,6 +168,7 @@ cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.mino
 
 cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.minor
 ```
+### Make index
 ```bash
 qsub star_index.sh S_minor_min_500bp_renamed.fasta sclerotinia_1.fq sclerotinia_2.fq
 ```
@@ -177,13 +179,18 @@ cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.suba
 
 cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/S.sclerotiorum/sclerotinia_*.fq /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.subarctica
 ```
+### Make index
 ```bash
 qsub star_index.sh S_sub_min_500bp_renamed.fasta sclerotinia_1.fq sclerotinia_2.fq
 ```
 
+```bash
+gzip sclerotinia_*.fq
+```
+
 #Running star using star_running.sh script in each folder
 ```bash
-qsub star_running.sh sclerotinia_1.fq sclerotinia_2.fq aligned/ index
+qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned/ index
 ```
 
 #Pre-gene prediction (cegma)
