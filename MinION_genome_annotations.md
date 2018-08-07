@@ -142,16 +142,16 @@ Dovetail_09Sept_Map_inspected_12-07-2015_1_v8_lg_9	204289203	0	0
 ### Nothing aligned to lettuce genome in this bam file which is good. Not sure why the stats still show the lettuce chromosomes.
 
 # Take bam file, back to fastq then re-run against my genomes?
-# Script in alignment/star/S.sclerotiorum folder with $1 bam file $2 output1.fq $3 output2.fq
+## Script in alignment/star/S.sclerotiorum folder with $1 bam file $2 output1.fq $3 output2.fq
 ```bash
 qsub bamtofastq.sh sclerotinia.bam sclerotinia_1.fq sclerotinia_2.fq
 ```
-# Copied genome files and fastq files to each of the MinION folders in alignment
+## Copied genome files and fastq files to each of the MinION folders in alignment
 
 ## Made indexes from within the folder with specific star_index.sh script in each
-## Not the most elegant method but it works
+### Not the most elegant method but it works
 
-### S.sclerotiorum P7
+## S.sclerotiorum P7
 ```bash
 cp /home/groups/harrisonlab/project_files/Sclerotinia_spp/assembly/MinION/S.sclerotiorum/P7/S_scl_min_500bp_renamed_mtfree.fasta /home/groups/harrisonlab/project_files/Sclerotinia_spp/alignment/star/MinION_genomes/S.sclerotiorum
 
