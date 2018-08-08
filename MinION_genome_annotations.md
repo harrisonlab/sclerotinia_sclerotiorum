@@ -199,6 +199,14 @@ qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned/ index
 
 # Gene prediction
 
+### Before braker predictiction was performed,double checked that I had the genemark key in my user area and copied it over from the genemark install
+directory:
+
+```bash
+ls ~/.gm_key
+cp /home/armita/prog/genemark/2018/gm_key_64 ~/.gm_key
+```
+
 # Gene training
 # Braker
 ```bash
