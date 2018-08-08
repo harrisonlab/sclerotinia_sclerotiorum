@@ -224,6 +224,19 @@ qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 # Coding quary
+
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
+	Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+	echo "$Organism - $Strain"
+	OutDir=gene_pred/codingquary/MinION_genomes/$Organism/$Strain
+	CufflinksGTF=$(ls gene_pred/cufflinks/$Organism/$Strain/transcripts.gtf)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+	qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+done
+```
+
 ### Additional genes were added to Braker gene predictions, using CodingQuary in pathogen mode to predict additional regions.
 
 ### Firstly, aligned RNAseq data was assembled into transcripts using Cufflinks.
