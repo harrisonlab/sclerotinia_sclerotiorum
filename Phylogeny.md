@@ -43,8 +43,7 @@ qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
-## Copy over all busco outputs?
-
+## Copy over all busco outputs from "assembly" of my genomes to gene_pred/busco
 
 ## Create a list of all BUSCO IDs
 ```bash
@@ -62,16 +61,57 @@ for Busco in $(cat analysis/MinION/popgen/busco_phylogeny/all_buscos_*.txt); do
 echo $Busco
 OutDir=analysis/MinION/popgen/busco_phylogeny/$Busco
 mkdir -p $OutDir
-for Fasta in $(ls gene_pred/busco/*/*/assembly/*/single_copy_busco_sequences/$Busco*.fna | grep -v -e 'Alternaria_destruens' -e 'Alternaria_porri' -e 'A.gaisen'); do
-
-
-Strain=$(echo $Fasta | rev | cut -f5 -d '/' | rev)
-Organism=$(echo $Fasta | rev | cut -f6 -d '/' | rev)
+for Fasta in $(ls gene_pred/busco/*/*/single_copy_busco_sequences/$Busco*.fna); do
+Organism=$(echo $Fasta | rev | cut -f4 -d '/' | rev)
 FileName=$(basename $Fasta)
-cat $Fasta | sed "s/:.*.fasta:/:"$Organism"_"$Strain":/g" | sed "s/:.*.fa:/:"$Organism"_"$Strain":/g" > $OutDir/"$Organism"_"$Strain"_"$Busco".fasta
+cat $Fasta | sed "s/:.*.fasta:/:"$Organism":/g" | sed "s/:.*.fa:/:"$Organism":/g" > $OutDir/"$Organism"_"$Busco".fasta
 done
 cat $OutDir/*_*_"$Busco".fasta > $OutDir/"$Busco"_appended.fasta
 SingleBuscoNum=$(cat $OutDir/"$Busco"_appended.fasta | grep '>' | cut -f2 -d ':' | sort | uniq | wc -l)
-printf "$Busco\t$SingleBuscoNum\n" >> analysis/popgen/busco_phylogeny/single_hits.txt
+printf "$Busco\t$SingleBuscoNum\n" >> analysis/MinION/popgen/busco_phylogeny/single_hits.txt
 done
+```
+
+## If all isolates have a single copy of a busco gene, move the appended fasta to a new folder
+```bash
+OutDir=analysis/MinION/popgen/busco_phylogeny/alignments
+mkdir -p $OutDir
+OrganismNum=$(cat analysis/MinION/popgen/busco_phylogeny/single_hits.txt | cut -f2 | sort -nr | head -n1)
+for Busco in $(cat analysis/MinION/popgen/busco_phylogeny/all_buscos_*.txt); do
+echo $Busco
+HitNum=$(cat analysis/MinION/popgen/busco_phylogeny/single_hits.txt | grep "$Busco" | cut -f2)
+if [ $HitNum == $OrganismNum ]; then
+# cp analysis/popgen/busco_phylogeny/$Busco/"$Busco"_appended.fasta $OutDir/.
+    cat analysis/MinION/popgen/busco_phylogeny/$Busco/"$Busco"_appended.fasta \
+    | sed "s/$Busco://g" \
+    | sed "s/genome.ctg.fa://g" \
+    | sed "s/_contigs_unmasked.fa//g" \
+    | sed -E "s/:.*//g" \
+    | tr '.,:' '_' \
+    > $OutDir/"$Busco"_appended.fasta
+  fi
+done
+```
+
+## Submit alignment for single copy busco genes with a hit in each organism
+```bash
+AlignDir=analysis/MinION/popgen/busco_phylogeny/alignments
+CurDir=$PWD
+cd $AlignDir
+ProgDir=/home/armita/git_repos/emr_repos/scripts/popgen/phylogenetics
+qsub $ProgDir/sub_mafft_alignment.sh
+cd $CurDir
+```
+
+## Trimming sequence alignments using Trim-Al
+### Note - automated1 mode is optimised for ML tree reconstruction
+
+```bash
+OutDir=analysis/MinION/popgen/busco_phylogeny/trimmed_alignments
+  mkdir -p $OutDir
+  for Alignment in $(ls analysis/MinION/popgen/busco_phylogeny/alignments/*_appended_aligned.fasta); do
+    TrimmedName=$(basename $Alignment .fasta)"_trimmed.fasta"
+    echo $Alignment
+    trimal -in $Alignment -out $OutDir/$TrimmedName -automated1
+  done
 ```
