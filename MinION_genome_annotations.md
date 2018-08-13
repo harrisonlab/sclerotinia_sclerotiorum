@@ -9,6 +9,7 @@ for RawData in raw_rna/S.sclerotiorum/*/*.fastq.gz; do
 	qsub $ProgDir/run_fastqc.sh $RawData
 done
 ```
+
 ### Trimming was performed on data to trim adapters from sequences and remove poor quality data.This was done with fastq-mcf
 
 ```bash
@@ -206,10 +207,10 @@ cp /home/armita/prog/genemark/2018/gm_key_64 ~/.gm_key
 # Gene training
 # Braker
 ```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
+for Assembly in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 echo $Assembly
-Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 OutDir=gene_pred/braker/MinION_genomes/$Organism/"$Strain"_braker
 AcceptedHits=$(ls alignment/star/MinION_genomes/$Organism/star_aligmentAligned.sortedByCoord.out.bam)
@@ -227,9 +228,9 @@ done
 ### Note - cufflinks doesn't always predict direction of a transcript and therefore features can not be restricted by strand when they are intersected.
 
 ```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
-Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+for Assembly in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | tail -n 2); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 OutDir=gene_pred/cufflinks/$Organism/$Strain/
 mkdir -p $OutDir
@@ -238,6 +239,7 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
+
 # Coding quary
 
 ```bash
@@ -271,6 +273,30 @@ for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
     qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
 	```
+### Combine softmasked data
+```bash
+for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+```
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+
+### Combine hardmasked data
+```bash
+for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_hardmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
+```
 
 ###Running directly on blacklace10
 	```bash
