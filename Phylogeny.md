@@ -108,10 +108,27 @@ cd $CurDir
 
 ```bash
 OutDir=analysis/MinION/popgen/busco_phylogeny/trimmed_alignments
-  mkdir -p $OutDir
-  for Alignment in $(ls analysis/MinION/popgen/busco_phylogeny/alignments/*_appended_aligned.fasta); do
-    TrimmedName=$(basename $Alignment .fasta)"_trimmed.fasta"
-    echo $Alignment
-    trimal -in $Alignment -out $OutDir/$TrimmedName -automated1
-  done
+mkdir -p $OutDir
+for Alignment in $(ls analysis/MinION/popgen/busco_phylogeny/alignments/*_appended_aligned.fasta); do
+TrimmedName=$(basename $Alignment .fasta)"_trimmed.fasta"
+echo $Alignment
+trimal -in $Alignment -out $OutDir/$TrimmedName -automated1
+done
+```
+
+```bash
+for Alignment in $(ls analysis/MinION/popgen/busco_phylogeny/trimmed_alignments/*aligned_trimmed.fasta); do
+Jobs=$(qstat | grep 'sub_RAxML' | grep 'qw' | wc -l)
+while [ $Jobs -gt 2 ]; do
+sleep 2s
+printf "."
+Jobs=$(qstat | grep 'sub_RAxML' | grep 'qw' | wc -l)
+done		
+printf "\n"
+echo $Prefix
+Prefix=$(basename $Alignment | cut -f1 -d '_')
+OutDir=analysis/MinION/popgen/busco_phylogeny/RAxML/$Prefix
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/phylogenetics
+qsub $ProgDir/sub_RAxML.sh $Alignment $Prefix $OutDir
+done
 ```
