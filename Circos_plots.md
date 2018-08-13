@@ -17,9 +17,12 @@ done
 
 ## Align all illumina reads to each genome
 
+
+###STOPPED HERE
+
 ```bash
 for Reference in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
-for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'S.trifoliorum' -e 'old_S.subartica'); do
+for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'S.trifoliorum' -e 'old_S.subartica' -e 'DG4'); do
 Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
 Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
 F_Read=$(ls $StrainPath/F/*_trim.fq.gz)
@@ -35,6 +38,7 @@ done
 done
 ```
 
+## ?
 ```bash
 ProgDir=~/git_repos/emr_repos/scripts/fusarium/pathogen/identify_LS_chromosomes/circos
 Fus2_genome=assembly/canu_spades_hybrid/F.oxysporum_fsp_cepae/Fus2/filtered_contigs/Fus2_contigs_renamed.fasta
