@@ -44,3 +44,34 @@ done
 ```
 
 ## Copy over all busco outputs?
+
+
+## Create a list of all BUSCO IDs
+```bash
+OutDir=analysis/MinION/popgen/busco_phylogeny
+mkdir -p $OutDir
+BuscoDb="ascomycota_odb9"
+ls -1 /home/groups/harrisonlab/dbBusco/$BuscoDb/hmms/*hmm | rev | cut -f1 -d '/' | rev | sed -e 's/.hmm//' > $OutDir/all_buscos_"$BuscoDb".txt
+```
+
+## For each busco gene create a folder and move all single copy busco hits from each assembly to the folder. Then create a fasta file containing all the aligned reads for each busco gene for alignment later.
+
+```bash
+printf "" > analysis/MinION/popgen/busco_phylogeny/single_hits.txt
+for Busco in $(cat analysis/MinION/popgen/busco_phylogeny/all_buscos_*.txt); do
+echo $Busco
+OutDir=analysis/MinION/popgen/busco_phylogeny/$Busco
+mkdir -p $OutDir
+for Fasta in $(ls gene_pred/busco/*/*/assembly/*/single_copy_busco_sequences/$Busco*.fna | grep -v -e 'Alternaria_destruens' -e 'Alternaria_porri' -e 'A.gaisen'); do
+
+
+Strain=$(echo $Fasta | rev | cut -f5 -d '/' | rev)
+Organism=$(echo $Fasta | rev | cut -f6 -d '/' | rev)
+FileName=$(basename $Fasta)
+cat $Fasta | sed "s/:.*.fasta:/:"$Organism"_"$Strain":/g" | sed "s/:.*.fa:/:"$Organism"_"$Strain":/g" > $OutDir/"$Organism"_"$Strain"_"$Busco".fasta
+done
+cat $OutDir/*_*_"$Busco".fasta > $OutDir/"$Busco"_appended.fasta
+SingleBuscoNum=$(cat $OutDir/"$Busco"_appended.fasta | grep '>' | cut -f2 -d ':' | sort | uniq | wc -l)
+printf "$Busco\t$SingleBuscoNum\n" >> analysis/popgen/busco_phylogeny/single_hits.txt
+done
+```

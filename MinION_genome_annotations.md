@@ -272,6 +272,19 @@ for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
 done
 	```
 
+###Running directly on blacklace10
+	```bash
+	for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta | tail -n2); do
+	    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+	    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	    echo "$Organism - $Strain"
+	    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
+	    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+	    $ProgDir/rep_modeling.sh $Assembly $OutDir
+	    # qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+	done
+		```
+
 ## Busco and QUAST
 ```bash
 for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
@@ -289,7 +302,7 @@ done
 
 ### Summary of quast/Busco
 ```bash
-for File in $(ls repeat_masked/*/*/filtered_contigs/run_*_contigs_unmasked/short_summary_*.txt); do
+for File in $(ls assembly/MinION/*/*/run*/short_summary_*.txt); do
   Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
   Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
   Complete=$(cat $File | grep "(C)" | cut -f2)
@@ -298,4 +311,10 @@ for File in $(ls repeat_masked/*/*/filtered_contigs/run_*_contigs_unmasked/short
   Total=$(cat $File | grep "Total" | cut -f2)
   echo -e "$Organism\t$Strain\t$Complete\t$Fragmented\t$Missing\t$Total"
   done
+```
+
+```bash
+MinION	S.minor	1293	6	16	1315
+MinION	S.sclerotiorum	1299	3	13	1315
+MinION	S.subarctica	1300	1	14	1315
 ```
