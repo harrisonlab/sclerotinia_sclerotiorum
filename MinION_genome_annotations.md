@@ -190,11 +190,7 @@ gzip sclerotinia_*.fq
 
 # Running star using star_running.sh script in each folder
 ```bash
-qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned/ index
-```
-
-# Pre-gene prediction (cegma)
-```bash
+qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned\ index
 ```
 
 # Gene prediction
@@ -223,19 +219,6 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/braker1
 qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
-# Coding quary
-
-```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
-	Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
-	Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
-	echo "$Organism - $Strain"
-	OutDir=gene_pred/codingquary/MinION_genomes/$Organism/$Strain
-	CufflinksGTF=$(ls gene_pred/cufflinks/$Organism/$Strain/transcripts.gtf)
-	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
-	qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
-done
-```
 
 ### Additional genes were added to Braker gene predictions, using CodingQuary in pathogen mode to predict additional regions.
 
@@ -253,5 +236,53 @@ mkdir -p $OutDir
 AcceptedHits=$(ls alignment/star/MinION_genomes/$Organism/star_aligmentAligned.sortedByCoord.out.bam)
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+done
+```
+# Coding quary
+
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
+	Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+	echo "$Organism - $Strain"
+	OutDir=gene_pred/codingquary/MinION_genomes/new/$Organism/$Strain
+	CufflinksGTF=$(ls gene_pred/cufflinks/$Organism/$Strain/transcripts.gtf)
+	ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+	qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+done
+```
+# Try again with reads aligned directly to my Genomes
+## Moved bam files produced from subset of sclerotinia reads aligned to my genomes into "original_run" file in each of the star/MinION_genomes/* folders
+
+```bash
+FileF=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/F/all_forward_trim.fq.gz
+FileR=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/R/all_reverse_trim.fq.gz
+qsub star_running.sh $FileF $FileR aligned index
+```
+## Repeat masking
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+    qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+    qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+done
+	```
+## Busco
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/filtered_contigs/*_contigs_unmasked.fa); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
