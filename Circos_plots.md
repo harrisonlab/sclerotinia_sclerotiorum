@@ -21,6 +21,8 @@ done
 
 ```bash
 for Reference in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_unmasked.fa); do
+  RefSpecies=$(echo $Reference | rev | cut -f4 -d '/' | rev)
+  echo $RefSpecies
 for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'S.trifoliorum' -e 'old_S.subartica' -e 'DG4'); do
 Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
 Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
@@ -29,9 +31,9 @@ R_Read=$(ls $StrainPath/R/*_trim.fq.gz)
 echo $F_Read
 echo $R_Read
 Prefix="${Organism}_${Strain}"
-OutDir=/genome_alignment/bwa/$Organism/$Strain/vs_${Reference}
+OutDir=/genome_alignment/bwa/$Organism/$Strain/vs_${RefSpecies}
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/genome_alignment
-qsub $ProgDir/bwa/sub_bwa.sh $Prefix $Reference $F_Read $R_Read $OutDir
+$ProgDir/bwa/sub_bwa.sh $Prefix $Reference $F_Read $R_Read $OutDir
 done
 done
 ```
