@@ -164,3 +164,71 @@ java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -q $OutDir/Scl_phylogeny.consensus
 ```bash
 cat Scl_phylogeny.consensus.scored.geneious.tre | sed 's/:2/:1/g' > Scl_phylogeny.consensus.scored.geneious2.tre
 ```
+
+## Finish plotting in R.
+
+```bash
+
+setwd("/Volumes/Backup/Sclerotinia_genomes/Phylogeny")
+
+library(ape)
+library(ggplot2)
+
+library(ggtree)
+library(phangorn)
+library(treeio)
+
+tree <- read.tree("/Volumes/Backup/Sclerotinia_genomes/Phylogeny/Scl_phylogeny.consensus.scored.geneious2.tre")
+
+mydata <- read.csv("/Volumes/Backup/Sclerotinia_genomes/Phylogeny/traits.csv", stringsAsFactors=FALSE)
+rownames(mydata) <- mydata$Isolate
+mydata <- mydata[match(tree$tip.label,rownames(mydata)),]
+
+t <- ggtree(tree, aes(linetype=nodes$support)) # Core tree
+# Adjust terminal branch lengths:
+branches <- t$data
+tree$edge.length[branches$isTip] <- 1.0
+#Tree <- branches$branch.length
+#rescale_tree(t, branches$branch.length)
+
+t <- t + geom_treescale(offset=-1.0, fontsize = 3) # Add scalebar
+# t <- t + xlim(0, 0.025) # Add more space for labels
+
+# Colouring labels by values in another df
+t <- t %<+% mydata # Allow colouring of nodes by another df
+#t <- t + geom_tiplab(aes(color=Source), size=3, hjust=0) +
+scale_color_manual(values=c("gray39","black")) # colours as defined by col2rgb
+
+tips <- data.frame(t$data)
+tips$label <- tips$ID
+t <- t + geom_tiplab(data=tips, aes(color=Source), size=3, hjust=0, offset = +0.1) +
+  scale_color_manual(values=c("gray39","black")) # colours as defined by col2rgb
+
+# Format nodes by values
+nodes <- data.frame(t$data)
+#nodes <- nodes[!nodes$isTip,]
+nodes$label <- as.numeric(nodes[nodes$label,])
+as.numeric(nodes$label)
+#nodes$label[nodes$label < 0.80] <- ''
+nodes$support[nodes$isTip] <- 'supported'
+nodes$support[(!nodes$isTip) & (nodes$label > 0.80)] <- 'supported'
+nodes$support[(!nodes$isTip) & (nodes$label < 0.80)] <- 'unsupported'
+nodes$support[(!nodes$isTip) & (nodes$label == '')] <- 'supported'
+t <- t + aes(linetype=nodes$support)
+nodes$label[nodes$label > 0.80] <- ''
+t <- t + geom_nodelab(data=nodes, size=2, hjust=-0.05) # colours as defined by col2rgb
+
+
+# Annotate a clade with a bar line
+# t <- t + geom_cladelabel(node=42, label='sect. Alternaria', align=T, colour='black', offset=-1.5)
+# t <- t + geom_cladelabel(node=70, label='gaisen clade', align=T, colour='black', offset=-4.5)
+# t <- t + geom_cladelabel(node=51, label='tenuissima clade', align=T, colour='black', offset=-4.5)
+# t <- t + geom_cladelabel(node=45, label='arborescens clade', align=T, colour='black', offset=-4.5)
+# t <- t + geom_cladelabel(node=43, label='sect. Alternaria', align=T, colour='black', offset=-0.0)
+# t <- t + geom_cladelabel(node=70, label='gaisen clade', align=T, colour='black', offset=-2.0)
+# t <- t + geom_cladelabel(node=46, label='tenuissima clade', align=T, colour='black', offset=-2.0)
+# t <- t + geom_cladelabel(node=65, label='arborescens clade', align=T, colour='black', offset=-2.0)
+
+# Save as PDF and force a 'huge' size plot
+t <- ggsave("tree5.pdf", width =80, height = 30, units = "cm", limitsize = FALSE)
+```
