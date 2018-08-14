@@ -582,3 +582,190 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swis
 qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
 done
 ```
+
+# Small secreted proteins
+## Putative effectors identified within Augustus gene models using a number of approaches:
+### A) From Braker gene models - Signal peptide & small cystein rich protein
+
+## A) From Augustus gene models - Identifying secreted proteins
+### Required programs:
+
+### SigP
+### biopython
+### TMHMM
+
+## Proteins that were predicted to contain signal peptides were identified using the following commands:
+
+## Run in screen!
+
+```bash
+screen -a
+for Proteome in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+SplitDir=gene_pred/braker_split/MinION_genomes/$Organism/$Strain
+mkdir -p $SplitDir
+BaseName="$Organism""_$Strain"_braker_preds
+$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+for File in $(ls $SplitDir/*_braker_preds_*); do
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+while [ $Jobs -gt '20' ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+done
+printf "\n"
+echo $File
+qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+done
+done
+```
+
+### The batch files of predicted secreted proteins needed to be combined into a single file for each strain. This was done with the following commands:
+```bash
+  for SplitDir in $(ls -d gene_pred/braker_split/MinION_genomes/*/*); do
+    Strain=$(echo $SplitDir | cut -d '/' -f5)
+    Organism=$(echo $SplitDir | cut -d '/' -f4)
+    InStringAA=''
+    InStringNeg=''
+    InStringTab=''
+    InStringTxt=''
+    SigpDir=MinION_genomes_signalp-4.1
+    echo "$Organism - $Strain"
+    for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+      InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
+      InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
+      InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
+      InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
+    done
+    cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+    cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+    tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+    cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+  done
+```
+
+## No. predicted secreted
+```bash
+grep -c "^>" file.aa
+S.minor S5- 915
+S.sclerotiorum P7- 923
+S.subarctica HE1- 888
+```
+
+## B) TMM domain analysis
+
+### Some proteins that are incorporated into the cell membrane require secretion. Therefore proteins with a transmembrane domain are not likely to represent cytoplasmic or apoplastic effectors.
+
+### Proteins containing a transmembrane domain were identified:
+
+```bash
+  for Proteome in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+    qsub $ProgDir/submit_TMHMM.sh $Proteome
+  done
+```
+### Those proteins with transmembrane domains were removed from lists of Signal peptide containing proteins
+
+```bash
+for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+# echo "$Organism - $Strain"
+NonTmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
+cat $File | cut -f1 > $NonTmHeaders
+SigP=$(ls gene_pred/MinION_genomes_signalp-4.1/$Organism/$Strain/"$Strain"_aug_sp.aa)
+OutDir=$(dirname $SigP)
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $SigP --headers $NonTmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+# echo "Number of SigP proteins:"
+TotalProts=$(cat $SigP | grep '>' | wc -l)
+# echo "Number without transmembrane domains:"
+SecProt=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l)
+# echo "Number of gene models:"
+SecGene=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d't' | sort | uniq |wc -l)
+# A text file was also made containing headers of proteins testing +ve
+PosFile=$(ls gene_pred/trans_mem/$Organism/$Strain/"$Strain"_TM_genes_pos.txt)
+TmHeaders=$(echo $PosFile | sed 's/.txt/_headers.txt/g')
+cat $PosFile | cut -f1 > $TmHeaders
+printf "$Organism\t$Strain\t$TotalProts\t$SecProt\t$SecGene\n"
+done
+```
+
+```bash
+No of SigP proteins	 No. without TM domain 	No. of gene models
+S.minor	S5	915	693	693
+S.sclerotiorum	P7	923	704	702
+S.subarctica	HE1	888	668	667
+```
+## C) From Augustus gene models - Effector identification using EffectorP
+### Required programs: EffectorP.py
+
+```bash
+  for Proteome in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+    BaseName="$Organism"_"$Strain"_EffectorP
+    OutDir=analysis/effectorP/MinION_genomes/$Organism/$Strain
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/fungal_effectors
+    qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+  done
+```
+
+## SSCP
+### Small secreted cysteine rich proteins were identified within secretomes. These proteins may be identified by EffectorP, but this approach allows direct control over what constitutes a SSCP.
+
+```bash
+for Secretome in $(ls gene_pred/MinION_genomes_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa); do
+Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=analysis/sscp/MinION_genomes/$Organism/$Strain
+mkdir -p $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+printf "number of SSC-rich genes:\t"
+cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
+done
+```
+
+```bash
+S.minor - S5
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	65
+number of SSC-rich genes:	65
+
+S.sclerotiorum - P7
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	67
+number of SSC-rich genes:	67
+
+S.subarctica - HE1
+% cysteine content threshold set to:	3
+maximum length set to:	300
+No. short-cysteine rich proteins in input fasta:	66
+number of SSC-rich genes:	66
+```
+
+## CAZY proteins
+### Carbohydrte active enzymes were idnetified using CAZYfollowing recomendations at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
+
+```bash
+for Proteome in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+OutDir=gene_pred/CAZY/MinION_genomes/$Organism/$Strain
+mkdir -p $OutDir
+Prefix="$Strain"_CAZY
+CazyHmm=../../../../../home/groups/harrisonlab/dbCAN/dbCAN-fam-HMMs.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMMER
+qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+done
+```
