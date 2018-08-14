@@ -15,9 +15,7 @@ qsub $ProgDir/rna_qc_fastq-mcf.sh $Read_F $Read_R $IluminaAdapters DNA
 done
 ```
 
-## Align all illumina reads to each genome
-
-###STOPPED HERE
+## Align all Illumina reads to each genome
 
 ```bash
 for Reference in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_unmasked.fa); do

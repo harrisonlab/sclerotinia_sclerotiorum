@@ -132,3 +132,35 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/phylogenetics
 qsub $ProgDir/sub_RAxML.sh $Alignment $Prefix $OutDir
 done
 ```
+
+### Run Astral to build a consensus phylogeny from a collective set of "best phylogenies" from each BUSCO locus
+
+## Note - "Recent versions of ASTRAL output a branch support value even without bootstrapping. Our analyses have revealed that this form of support is more reliable than bootstrapping (under the conditions we explored). Nevertheless, you may want to run bootstrapping as well."
+## Tutorial tips: https://github.com/smirarab/ASTRAL/blob/master/astral-tutorial.md#running-with-unresolved-gene-trees
+
+```bash
+OutDir=analysis/MinION/popgen/busco_phylogeny/ASTRAL
+mkdir -p $OutDir
+# cat analysis/popgen/busco_phylogeny/RAxML/*/RAxML_bestTree.* > $OutDir/Pcac_phylogeny.appended.tre
+# Andy-Taxa names were noted to be incorrect at this point and were corrected
+# Me- no harm in keeping the Sed command in
+cat analysis/MinION/popgen/busco_phylogeny/RAxML/*/RAxML_bestTree.*  | sed -r "s/CTG.\w+:/:/g" | sed 's/__/_/g' > $OutDir/Scl_phylogeny.appended.tre
+
+# InTree=$(ls /home/armita/prog/Astral/Astral/test_data/song_primates.424.gene.tre)
+# -
+# Trimm back branches that have less than 10% bootstrap support for each tree
+# in the given file
+# -
+/home/armita/prog/newick_utilities/newick_utils/src/nw_ed $OutDir/Scl_phylogeny.appended.tre 'i & b<=10' o > $OutDir/Scl_phylogeny.appended.trimmed.tre
+# -
+# Calculate combined tree
+# -
+ProgDir=/home/armita/prog/Astral/Astral
+# java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -i $OutDir/Pcac_phylogeny.appended.trimmed.tre -o $OutDir/Pcac_phylogeny.consensus.tre | tee 2> $OutDir/Pcac_phylogeny.consensus.log
+java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -i $OutDir/Scl_phylogeny.appended.tre -o $OutDir/Scl_phylogeny.consensus.tre | tee 2> $OutDir/Scl_phylogeny.consensus.log
+java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -q $OutDir/Scl_phylogeny.consensus.tre -i $OutDir/Scl_phylogeny.appended.tre -o $OutDir/Scl_phylogeny.consensus.scored.tre 2> $OutDir/Scl_phylogeny.consensus.scored.log
+```
+
+```bash
+cat Scl_phylogeny.consensus.scored.geneious.tre | sed 's/:2/:1/g' > Scl_phylogeny.consensus.scored.geneious2.tre
+```

@@ -243,9 +243,9 @@ done
 # Coding quary
 
 ```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
-	Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
-	Organism=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+for Assembly in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+	Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 	echo "$Organism - $Strain"
 	OutDir=gene_pred/codingquary/MinION_genomes/new/$Organism/$Strain
 	CufflinksGTF=$(ls gene_pred/cufflinks/$Organism/$Strain/transcripts.gtf)
@@ -253,6 +253,166 @@ for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta);do
 	qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
 ```
+
+### The next step had problems with the masked pacbio genome. Bioperl could not read in the fasta sequences. This was overcome by wrapping the unmasked genome and using this fasta file.
+
+```bash
+for Assembly in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_unmasked.fa); do
+NewName=$(echo $Assembly | sed 's/_unmasked.fa/_unmasked_wrapped.fa/g')
+echo $NewName
+cat $Assembly | fold > $NewName
+done
+```
+
+Then, additional transcripts were added to Braker gene models, when CodingQuary genes were predicted in regions of the genome, not containing Braker gene models:
+
+```bash
+for BrakerGff in $(ls gene_pred/braker/MinION_genomes/*/*_braker/*/augustus.gff3); do
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev | sed 's/_braker_new//g' | sed 's/_braker_pacbio//g' | sed 's/_braker//g')
+Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+Assembly=$(ls repeat_masked/MinION_genomes/$Organism/$Strain/filtered_contigs/*_contigs_unmasked_wrapped.fa)
+CodingQuaryGff=$(ls gene_pred/codingquary/MinION_genomes/new/$Organism/$Strain/out/PredictedPass.gff3)
+PGNGff=$(ls gene_pred/codingquary/MinION_genomes/new/$Organism/$Strain/out/PGN_predictedPass.gff3)
+AddDir=gene_pred/codingquary/MinION_genomes/$Organism/$Strain/additional
+FinalDir=gene_pred/final/MinION_genomes/$Organism/$Strain/final
+AddGenesList=$AddDir/additional_genes.txt
+AddGenesGff=$AddDir/additional_genes.gff
+FinalGff=$AddDir/combined_genes.gff
+mkdir -p $AddDir
+mkdir -p $FinalDir
+
+for x in $CodingQuaryGff $PGNGff; do
+  bedtools intersect -v -a $x -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';'
+done > $AddGenesList
+
+for y in $CodingQuaryGff $PGNGff; do
+  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+  $ProgDir/gene_list_to_gff.pl $AddGenesList $y CodingQuarry_v2.0 ID CodingQuary
+done > $AddGenesGff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+# -
+# This section is edited
+$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $AddDir/add_genes_CodingQuary_unspliced.gff3
+$ProgDir/correct_CodingQuary_splicing.py --inp_gff $AddDir/add_genes_CodingQuary_unspliced.gff3 > $FinalDir/final_genes_CodingQuary.gff3
+# -
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+
+GffBraker=$FinalDir/final_genes_CodingQuary.gff3
+GffQuary=$FinalDir/final_genes_Braker.gff3
+GffAppended=$FinalDir/final_genes_appended.gff3
+cat $GffBraker $GffQuary > $GffAppended
+done
+```
+
+###The final number of genes per isolate was observed using:
+```bash
+  for DirPath in $(ls -d gene_pred/final/MinION_genomes/*/*/final); do
+    Strain=$(echo $DirPath| rev | cut -d '/' -f2 | rev)
+    Organism=$(echo $DirPath | rev | cut -d '/' -f3 | rev)
+    echo "$Organism - $Strain"
+    cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+    cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+    cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+    echo "";
+  done
+```
+
+```bash
+S.minor - S5
+Braker: 9857
+Coding Quary: 1794
+Total: 11651
+
+S.sclerotiorum - P7
+10292
+1108
+11400
+
+S.subarctica - HE1
+10065
+1139
+11204
+```
+
+## In preperation for submission to ncbi, gene models were renamed and duplicate gene features were identified and removed.
+
+no duplicate genes were identified:
+
+```bash
+for GffAppended in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended.gff3); do
+Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+FinalDir=gene_pred/final/MinION_genomes/$Organism/$Strain/final
+GffFiltered=$FinalDir/filtered_duplicates.gff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+$ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
+GffRenamed=$FinalDir/final_genes_appended_renamed.gff3
+LogFile=$FinalDir/final_genes_appended_renamed.log
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+rm $GffFiltered
+# Assembly=$(ls repeat_masked/$Organism/$Strain/filtered_contigs/*_softmasked_repeatmasker_TPSI_appended.fa)
+Assembly=$(ls repeat_masked/MinION_genomes/$Organism/$Strain/filtered_contigs/*_contigs_unmasked_wrapped.fa)
+$ProgDir/gff2fasta.pl $Assembly $GffRenamed gene_pred/final/MinION_genomes/$Organism/$Strain/final/final_genes_appended_renamed
+# The proteins fasta file contains * instead of Xs for stop codons, these should
+# be changed
+sed -i 's/\*/X/g' gene_pred/final/MinION_genomes/$Organism/$Strain/final/final_genes_appended_renamed.pep.fasta
+done
+```
+
+```bash
+# S.minor - S5
+# Identified the following duplicated transcripts:
+CUFF_7351_1_6.t2
+CUFF_7351_1_6.t3
+# NOTE - if any of these represent the first transcript of a gene (.t1) then an entire gene may be duplicated
+# if so the gene feature will need to be stripped out of the gff file seperately.
+
+# S.sclerotiorum - P7
+# Identified the following duplicated transcripts:
+CUFF_1566_1_620.t2
+# NOTE - if any of these represent the first transcript of a gene (.t1) then an entire gene may be duplicated
+# if so the gene feature will need to be stripped out of the gff file seperately.
+
+# S.subarctica - HE1
+# Identified the following duplicated transcripts:
+CUFF_3613_1_268.t2
+CUFF_7799_1_194.t2
+CUFF_5056_1_650.t3
+CUFF_5056_1_650.t2
+CUFF_5785_1_618.t2
+CUFF_4270_1_974.t2
+```
+
+### Remove dulplicated genes
+```bash
+for File in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+  echo $File | rev | cut -f3 -d '/' |  rev
+  cat $File | grep '>' | wc -l
+done
+```
+
+```bash
+Final gene numbers
+S5
+11649
+
+P7
+11399
+
+HE1
+11198
+```
+
+
 # Try again with reads aligned directly to my Genomes
 ## Moved bam files produced from subset of sclerotinia reads aligned to my genomes into "original_run" file in each of the star/MinION_genomes/* folders
 
@@ -261,6 +421,7 @@ FileF=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sc
 FileR=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/R/all_reverse_trim.fq.gz
 qsub star_running.sh $FileF $FileR aligned index
 ```
+
 ## Repeat masking
 ```bash
 for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
