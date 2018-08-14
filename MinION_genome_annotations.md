@@ -193,6 +193,98 @@ gzip sclerotinia_*.fq
 ```bash
 qsub star_running.sh sclerotinia_1.fq.gz sclerotinia_2.fq.gz aligned\ index
 ```
+# Try again with reads aligned directly to my Genomes
+## Moved bam files produced from subset of sclerotinia reads aligned to my genomes into "original_run" file in each of the star/MinION_genomes/* folders
+
+```bash
+FileF=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/F/all_forward_trim.fq.gz
+FileR=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/R/all_reverse_trim.fq.gz
+qsub star_running.sh $FileF $FileR aligned index
+```
+
+## Repeat masking
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+    qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+    qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+done
+	```
+### Combine softmasked data
+```bash
+for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+```
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+
+### Combine hardmasked data
+```bash
+for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_hardmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
+```
+
+###Running directly on blacklace10
+	```bash
+	for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta | tail -n2); do
+	    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+	    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	    echo "$Organism - $Strain"
+	    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
+	    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
+	    $ProgDir/rep_modeling.sh $Assembly $OutDir
+	    # qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+	done
+		```
+
+## Busco and QUAST
+```bash
+for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
+
+### Summary of quast/Busco
+```bash
+for File in $(ls assembly/MinION/*/*/run*/short_summary_*.txt); do
+  Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+  Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+  Complete=$(cat $File | grep "(C)" | cut -f2)
+  Fragmented=$(cat $File | grep "(F)" | cut -f2)
+  Missing=$(cat $File | grep "(M)" | cut -f2)
+  Total=$(cat $File | grep "Total" | cut -f2)
+  echo -e "$Organism\t$Strain\t$Complete\t$Fragmented\t$Missing\t$Total"
+  done
+```
+
+```bash
+MinION	S.minor	1293	6	16	1315
+MinION	S.sclerotiorum	1299	3	13	1315
+MinION	S.subarctica	1300	1	14	1315
+```
 
 # Gene prediction
 
@@ -412,96 +504,81 @@ HE1
 11198
 ```
 
-
-# Try again with reads aligned directly to my Genomes
-## Moved bam files produced from subset of sclerotinia reads aligned to my genomes into "original_run" file in each of the star/MinION_genomes/* folders
+# Check gene prediction with Busco
 
 ```bash
-FileF=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/F/all_forward_trim.fq.gz
-FileR=/home/groups/harrisonlab/project_files/Sclerotinia_spp/qc_rna/raw_rna/S.sclerotiorum/R/all_reverse_trim.fq.gz
-qsub star_running.sh $FileF $FileR aligned index
+for Assembly in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.gene.fasta); do
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+   BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+   OutDir=gene_pred/busco/$Organism/$Strain/transcript
+   qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+ done
 ```
 
-## Repeat masking
+## Summary
 ```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-    echo "$Organism - $Strain"
-    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-    qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
-    qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
-done
-	```
-### Combine softmasked data
-```bash
-for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked.fa); do
-OutDir=$(dirname $File)
-TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
-echo "$OutFile"
-bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
-echo "Number of masked bases:"
-cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
-done
-```
-# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
-
-### Combine hardmasked data
-```bash
-for File in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_hardmasked.fa); do
-OutDir=$(dirname $File)
-TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
-echo "$OutFile"
-bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
-done
+ for File in $(ls gene_pred/busco/*/*/transcript/*/short_summary_*.txt); do
+ Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+ Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+ Complete=$(cat $File | grep "(C)" | cut -f2)
+ Single=$(cat $File | grep "(S)" | cut -f2)
+ Fragmented=$(cat $File | grep "(F)" | cut -f2)
+ Missing=$(cat $File | grep "(M)" | cut -f2)
+ Total=$(cat $File | grep "Total" | cut -f2)
+ echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
+ done
 ```
 
-###Running directly on blacklace10
-	```bash
-	for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta | tail -n2); do
-	    Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-	    Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-	    echo "$Organism - $Strain"
-	    OutDir=repeat_masked/MinION_genomes/$Organism/"$Strain"/filtered_contigs
-	    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/repeat_masking
-	    $ProgDir/rep_modeling.sh $Assembly $OutDir
-	    # qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
-	done
-		```
-
-## Busco and QUAST
 ```bash
-for Assembly in $(ls assembly/MinION/*/*/*_min_500bp_*.fasta); do
-Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-OutDir=$(dirname $Assembly)
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
-OutDir=$(dirname $Assembly)
-qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+S.minor	S5	1281	1280	16	18	1315
+S.sclerotiorum	P7	1287	1285	14	14	1315
+```
+
+# A) Interproscan
+### Interproscan was used to give gene models functional annotations. Annotation was run using the commands below:
+
+### Note: This is a long-running script. As such, these commands were run using 'screen' to allow jobs to be submitted and monitored in the background. This allows the session to be disconnected and reconnected over time.
+
+### Screen ouput detailing the progress of submission of interporscan jobs was redirected to a temporary output file named interproscan_submission.log .
+
+```bash
+screen -a
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+for Genes in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+echo $Genes
+$ProgDir/sub_interproscan.sh $Genes
+done 2>&1 | tee -a interproscan_submisison.log
+```
+
+###TO DO
+
+## Following interproscan annotation split files were combined using the following commands:
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+for Proteins in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta | grep -e '1166' -e '650' | grep '650'); do
+Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+echo $Strain
+InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+$ProgDir/append_interpro.sh $Proteins $InterProRaw
 done
 ```
 
-### Summary of quast/Busco
-```bash
-for File in $(ls assembly/MinION/*/*/run*/short_summary_*.txt); do
-  Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
-  Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
-  Complete=$(cat $File | grep "(C)" | cut -f2)
-  Fragmented=$(cat $File | grep "(F)" | cut -f2)
-  Missing=$(cat $File | grep "(M)" | cut -f2)
-  Total=$(cat $File | grep "Total" | cut -f2)
-  echo -e "$Organism\t$Strain\t$Complete\t$Fragmented\t$Missing\t$Total"
-  done
-```
+# B) SwissProt
 
 ```bash
-MinION	S.minor	1293	6	16	1315
-MinION	S.sclerotiorum	1299	3	13	1315
-MinION	S.subarctica	1300	1	14	1315
+for Proteome in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.pep.fasta); do
+Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+OutDir=gene_pred/swissprot/MinION_genomes/$Organism/$Strain
+SwissDbDir=../../../../../home/groups/harrisonlab/uniprot/swissprot
+SwissDbName=uniprot_sprot
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/swissprot
+qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
+done
 ```
