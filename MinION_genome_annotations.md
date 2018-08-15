@@ -855,3 +855,26 @@ S.minor	S5	518	518	229	229
 S.sclerotiorum	P7	529	529	218	218
 S.subarctica	HE1	512	512	211	211
 ```
+
+#PhiBase
+
+## Genes with homology to PHIbase
+### Predicted gene models were searched against the PHIbase database using tBLASTx.
+
+```bash
+qlogin -pe smp 12
+dbFasta=$(ls /home/groups/harrisonlab/phibase/v4.4/phi_accessions.fa)
+dbType="prot"
+for QueryFasta in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_appended_renamed.cds.fasta); do
+Organism=$(echo $QueryFasta | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $QueryFasta | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Prefix="${Strain}_phi_accessions"
+Eval="1e-30"
+OutDir=analysis/blast_homology/MinION_genomes/$Organism/$Strain
+mkdir -p $OutDir
+makeblastdb -in $dbFasta -input_type fasta -dbtype $dbType -title $Prefix.db -parse_seqids -out $OutDir/$Prefix.db
+blastx -num_threads 6 -db $OutDir/$Prefix.db -query $QueryFasta -outfmt 6 -num_alignments 1 -out $OutDir/${Prefix}_hits.txt -evalue $Eval
+cat $OutDir/${Prefix}_hits.txt | grep 'effector' | cut -f1,2 | sort | uniq > $OutDir/${Prefix}_hits_headers.txt
+done
+```
