@@ -57,7 +57,7 @@ Poor_proteins_file=$WorkDir/badProteins/poorProteins.fasta
 orthomclFilterFasta $Input_dir $Min_length $Max_percent_stops $Good_proteins_file $Poor_proteins_file
 ```
 
-```bash 
+```bash
 IsolateAbrv=Scl_all_isolates
 WorkDir=analysis/orthology/orthomcl/MinION_genomes/$IsolateAbrv
 orthofinder -f $WorkDir/formatted -t 3 -a 3

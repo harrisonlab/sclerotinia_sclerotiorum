@@ -715,6 +715,48 @@ S.subarctica	HE1	888	668	667
     qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
   done
 ```
+Those genes that were predicted as secreted and tested positive by effectorP were identified:
+
+Note - this doesnt exclude proteins with TM domains or GPI anchors
+
+```bash
+  for File in $(ls analysis/effectorP/MinION_genomes/*/*/*_EffectorP.txt); do
+    Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+    cat $File | grep 'Effector' | grep -v 'Effector probability:' | cut -f1 > $Headers
+    printf "EffectorP headers:\t"
+    cat $Headers | wc -l
+    Secretome=$(ls gene_pred/MinION_genomes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+    OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+    $ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+    OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+    cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+    printf "Secreted effectorP headers:\t"
+    cat $OutFileHeaders | wc -l
+    Gff=$(ls gene_pred/final/MinION_genomes/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
+    EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+    $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+  done
+```
+
+```bash
+S.minor - S5
+EffectorP headers:	1736
+Secreted effectorP headers:	78
+
+S.sclerotiorum - P7
+EffectorP headers:	1720
+Secreted effectorP headers:	84
+
+S.subarctica - HE1
+EffectorP headers:	1723
+Secreted effectorP headers:	81
+```
+
 
 ## SSCP
 ### Small secreted cysteine rich proteins were identified within secretomes. These proteins may be identified by EffectorP, but this approach allows direct control over what constitutes a SSCP.
