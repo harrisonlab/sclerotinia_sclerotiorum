@@ -43,6 +43,21 @@ qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
+## NB: realised ran on old Sclerotinia ref genome. 
+Re-run busco on new genome
+
+## Run Busco on all phylogenies
+```bash
+for Assembly in $(ls assembly/Scl_database/Sclerotinia_sclerotiorum_v2_1980/genome.ctg.fa); do
+Organism=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+echo $Organism
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
+BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/ascomycota_odb9)
+OutDir=gene_pred/busco/$Organism/
+qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
+
 ## Copy over all busco outputs from "assembly" of my genomes to gene_pred/busco
 
 ## Create a list of all BUSCO IDs

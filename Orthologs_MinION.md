@@ -38,7 +38,7 @@ orthomclAdjustFasta $Taxon_code $Fasta_file $Id_field
 mv "$Taxon_code".fasta $WorkDir/formatted/"$Taxon_code".fasta
 ```
 
-##for S. s isolate HE1
+##for S. sclerotiorum publlished
 ```bash
 Taxon_code=Sscl_2
 Fasta_file=$(ls analysis/orthology/orthomcl/MinION_genomes/S_sclerotiorum_1980_edit.fasta)
