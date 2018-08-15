@@ -769,3 +769,47 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/HMME
 qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
 done
 ```
+### The Hmm parser was used to filter hits by an E-value of E1x10-5 or E1x10-e3 if they had a hit over a length of X %.
+
+### Those proteins with a signal peptide were extracted from the list and gff files representing these proteins made.
+
+```bash
+for File in $(ls gene_pred/CAZY/MinION_genomes/*/*/*CAZY.out.dm); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $File)
+echo "$Organism - $Strain"
+ProgDir=/home/groups/harrisonlab/dbCAN
+$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
+CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
+cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
+# echo "number of CAZY proteins identified:"
+TotalProts=$(cat $CazyHeaders | wc -l)
+# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+Gff=$(ls gene_pred/final/MinION_genomes/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+CazyGff=$OutDir/"$Strain"_CAZY.gff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+# echo "number of CAZY genes identified:"
+TotalGenes=$(cat $CazyGff | grep -w 'gene' | wc -l)
+
+SecretedProts=$(ls gene_pred/MinION_genomes_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
+$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
+# echo "number of Secreted CAZY proteins identified:"
+cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
+SecProts=$(cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l)
+# echo "number of Secreted CAZY genes identified:"
+SecGenes=$(cat $CazyGffSecreted | grep -w 'gene' | wc -l)
+# cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
+printf "$Organism\t$Strain\t$TotalProts\t$TotalGenes\t$SecProts\t$SecGenes\n"
+done
+```
+## CAZymes output
+```bash
+S.minor	S5	518	518	229	229
+S.sclerotiorum	P7	529	529	218	218
+S.subarctica	HE1	512	512	211	211
+```
