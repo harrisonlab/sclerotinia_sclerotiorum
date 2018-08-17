@@ -878,3 +878,87 @@ blastx -num_threads 6 -db $OutDir/$Prefix.db -query $QueryFasta -outfmt 6 -num_a
 cat $OutDir/${Prefix}_hits.txt | grep 'effector' | cut -f1,2 | sort | uniq > $OutDir/${Prefix}_hits_headers.txt
 done
 ```
+
+# Antismash (Secondary metabolites)
+
+## Antismash was run to identify clusters of secondary metabolite genes within the genome. Antismash was run using the weserver at: http://antismash.secondarymetabolites.org
+
+## Results of web-annotation of gene clusters within the assembly were downloaded to the following directories:
+
+```bash
+for Assembly in $(ls repeat_masked/MinION_genomes/*/*/filtered_contigs/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+	 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+	 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+	 OutDir=gene_pred/secondary_metabolites/antismash/$Organism/$Strain
+	 mkdir -p $OutDir
+ done
+```
+
+```bash
+for Zip in $(ls gene_pred/secondary_metabolites/antismash/*/*/*.tar.gz); do
+	tar -xvzf $Zip
+done
+```
+
+```bash
+for AntiSmash in $(ls gene_pred/secondary_metabolites/antismash/*/*/*/*.final.gbk); do
+    Organism=$(echo $AntiSmash | rev | cut -f4 -d '/' | rev)
+    Strain=$(echo $AntiSmash | rev | cut -f3 -d '/' | rev)
+    echo "$Organism - $Strain"
+    OutDir=gene_pred/secondary_metabolites/antismash/$Organism/$Strain
+    Prefix=$OutDir/${Strain}_antismash
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+    $ProgDir/antismash2gff.py --inp_antismash $AntiSmash --out_prefix $Prefix
+
+    # Identify secondary metabolites within predicted clusters
+    printf "Number of secondary metabolite detected:\t"
+    cat "$Prefix"_secmet_clusters.gff | wc -l
+    GeneGff=gene_pred/final/MinION_genomes/$Organism/$Strain/final/final_genes_appended_renamed.gff3
+    bedtools intersect -u -a $GeneGff -b "$Prefix"_secmet_clusters.gff > "$Prefix"_secmet_genes.gff
+    cat "$Prefix"_secmet_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > "$Prefix"_antismash_secmet_genes.txt
+    bedtools intersect -wo -a $GeneGff -b "$Prefix"_secmet_clusters.gff | grep 'mRNA' | cut -f9,10,12,18 | sed "s/ID=//g" | perl -p -i -e "s/;Parent=g\w+//g" | perl -p -i -e "s/;Notes=.*//g" > "$Prefix"_secmet_genes.tsv
+    printf "Number of predicted proteins in secondary metabolite clusters:\t"
+    cat "$Prefix"_secmet_genes.tsv | wc -l
+    printf "Number of predicted genes in secondary metabolite clusters:\t"
+    cat "$Prefix"_secmet_genes.gff | grep -w 'gene' | wc -l
+
+      # Identify cluster finder additional non-secondary metabolite clusters
+      printf "Number of cluster finder non-SecMet clusters detected:\t"
+      cat "$Prefix"_clusterfinder_clusters.gff | wc -l
+      GeneGff=gene_pred/final/MinION_genomes/$Organism/$Strain/final/final_genes_appended_renamed.gff3
+      bedtools intersect -u -a $GeneGff -b "$Prefix"_clusterfinder_clusters.gff > "$Prefix"_clusterfinder_genes.gff
+      cat "$Prefix"_clusterfinder_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > "$Prefix"_clusterfinder_genes.txt
+
+      printf "Number of predicted proteins in cluster finder non-SecMet clusters:\t"
+      cat "$Prefix"_clusterfinder_genes.txt | wc -l
+      printf "Number of predicted genes in cluster finder non-SecMet clusters:\t"
+      cat "$Prefix"_clusterfinder_genes.gff | grep -w 'gene' | wc -l
+  done
+```
+### These clusters represented the following genes. Note that these numbers just show the number of intersected genes with gff clusters and are not confirmed by function
+
+```bash
+S.minor
+Number of secondary metabolite detected: 30
+Number of predicted proteins in secondary metabolite clusters: 687
+Number of predicted genes in secondary metabolite clusters: 589
+Number of cluster finder non-SecMet clusters detected: 53
+Number of predicted proteins in cluster finder non-SecMet clusters: 1195
+Number of predicted genes in cluster finder non-SecMet clusters: 1194
+
+S.sub
+Number of secondary metabolite detected: 34
+Number of predicted proteins in secondary metabolite clusters: 773
+Number of predicted genes in secondary metabolite clusters: 687
+Number of cluster finder non-SecMet clusters detected: 48
+Number of predicted proteins in cluster finder non-SecMet clusters: 1161
+Number of predicted genes in cluster finder non-SecMet clusters: 1158
+
+S.scl
+Number of secondary metabolite detected: 39
+Number of predicted proteins in secondary metabolite clusters: 886
+Number of predicted genes in secondary metabolite clusters: 823
+Number of cluster finder non-SecMet clusters detected: 50
+Number of predicted proteins in cluster finder non-SecMet clusters: 1106
+Number of predicted genes in cluster finder non-SecMet clusters:1089
+```
