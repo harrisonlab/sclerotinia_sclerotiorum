@@ -43,7 +43,7 @@ qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
-## NB: realised ran on old Sclerotinia ref genome. 
+## NB: realised ran on old Sclerotinia ref genome.
 Re-run busco on new genome
 
 ## Run Busco on all phylogenies
@@ -175,6 +175,16 @@ ProgDir=/home/armita/prog/Astral/Astral
 java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -i $OutDir/Scl_phylogeny.appended.tre -o $OutDir/Scl_phylogeny.consensus.tre | tee 2> $OutDir/Scl_phylogeny.consensus.log
 java -Xmx1000M -jar $ProgDir/astral.5.6.1.jar -q $OutDir/Scl_phylogeny.consensus.tre -i $OutDir/Scl_phylogeny.appended.tre -o $OutDir/Scl_phylogeny.consensus.scored.tre 2> $OutDir/Scl_phylogeny.consensus.scored.log
 ```
+GGtree was used to make a plot.
+
+Note- Tips can be found here: https://bioconnector.org/r-ggtree.html
+
+Note- Tips can be found here: https://bioconnector.org/r-ggtree.html
+
+The consensus tree was downloaded to my local machine
+
+Note - I had to import into geneious and export again in newick format to get around polytomy branches having no branch length.
+Terminal branch lengths are meanlingless from ASTRAL and should all be set to an arbitrary value. This will be done by geneious (set to 1), but it also introduces a branch length of 2 for one isolate that needs to be corrected with sed
 
 ```bash
 cat Scl_phylogeny.consensus.scored.geneious.tre | sed 's/:2/:1/g' > Scl_phylogeny.consensus.scored.geneious2.tre
