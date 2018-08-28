@@ -535,6 +535,7 @@ for Assembly in $(ls gene_pred/final/MinION_genomes/*/*/final/final_genes_append
 ```bash
 S.minor	S5	1281	1280	16	18	1315
 S.sclerotiorum	P7	1287	1285	14	14	1315
+S.subarctica	HE1	1280	1278	14	21	1315
 ```
 
 # A) Interproscan
